@@ -4,10 +4,10 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{3324F4E2-2C66-4ED3-B0C8-C9D03D5D02A9}</ProjectGuid>
+    <ProjectGuid>{B62F654B-765F-4BA1-89A7-D9AD264A1E73}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>ConcurrentProgramming</RootNamespace>
-    <AssemblyName>ConcurrentProgramming</AssemblyName>
+    <RootNamespace>View</RootNamespace>
+    <AssemblyName>View</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
