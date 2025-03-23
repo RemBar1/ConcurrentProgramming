@@ -8,8 +8,4 @@
 	<RootNamespace>ConcurrentProgramming.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\PresentationModel\PresentationModel.csproj" />
-  </ItemGroup>
-
 </Project>
