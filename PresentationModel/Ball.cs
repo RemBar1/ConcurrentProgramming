@@ -46,7 +46,7 @@ namespace ConcurrentProgramming.PresentationModel
             }
         }
 
-        public int Diameter => BallDiameter;
+        public static int Diameter => BallDiameter;
         public void Move()
         {
             int newX = positionX + velocityX;

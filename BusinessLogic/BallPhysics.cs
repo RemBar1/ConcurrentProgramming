@@ -5,7 +5,7 @@ namespace ConcurrentProgramming.BusinessLogic
     public class BallPhysics
     {
         BallRepository ballRepository;
-        Random random = new Random();
+        Random random = new();
         private CancellationTokenSource cancellationTokenSource = new();
 
         public BallPhysics(BallRepository ballRepository)

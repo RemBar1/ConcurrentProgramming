@@ -32,7 +32,7 @@ namespace ConcurrentProgramming.PresentationViewModel
             ballPhysics.StopSimulation();
         }
 
-        private void RestartSimulation()
+        public void RestartSimulation()
         {
             StopSimulation();
             ballPhysics.CreateBalls();
