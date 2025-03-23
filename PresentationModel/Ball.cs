@@ -2,7 +2,7 @@
 
 namespace ConcurrentProgramming.PresentationModel
 {
-    public class Ball
+    public class Ball : INotifyPropertyChanged
     {
         private int positionX;
         private int positionY;
@@ -12,16 +12,14 @@ namespace ConcurrentProgramming.PresentationModel
         private const int MaxHeight = 500;
         private const int BallDiameter = 20;
 
-        public event PropertyChangedEventHandler PropertyChanged;
-
         public Ball(int positionX, int positionY)
         {
-            this.positionX = positionX;
-            this.positionY = positionY;
-            this.velocityX = 5;
-            this.velocityY = 5;
+            PositionX = positionX;
+            PositionY = positionY;
+            velocityX = 1;
+            velocityY = 1;
         }
-
+        public event PropertyChangedEventHandler PropertyChanged;
         public int PositionX
         {
             get => positionX;

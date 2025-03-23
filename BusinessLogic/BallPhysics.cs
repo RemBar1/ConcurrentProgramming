@@ -1,5 +1,4 @@
 ﻿using ConcurrentProgramming.Data;
-using ConcurrentProgramming.PresentationModel;
 
 namespace ConcurrentProgramming.BusinessLogic
 {
@@ -15,9 +14,10 @@ namespace ConcurrentProgramming.BusinessLogic
         }
         public void CreateBalls()
         {
+            ballRepository.Balls.Clear();
             for (int i = 0; i < random.Next(5, 10); i++)
             {
-                ballRepository.AddBall(random.Next(20, 380), random.Next(20, 400));
+                ballRepository.AddBall(random.Next(0, 600), random.Next(0, 400));
             }
         }
 
@@ -28,11 +28,11 @@ namespace ConcurrentProgramming.BusinessLogic
             {
                 while (!cancellationTokenSource.Token.IsCancellationRequested)
                 {
-                    foreach (Ball ball in ballRepository.Balls)
+                    foreach (var ball in ballRepository.Balls)
                     {
                         ball.Move();
                     }
-                    await Task.Delay(30);
+                    await Task.Delay(5);
                 }
             }, cancellationTokenSource.Token);
         }

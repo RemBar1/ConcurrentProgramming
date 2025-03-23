@@ -12,8 +12,8 @@
     </Window.DataContext>
 
     <Grid>
-        <Border BorderThickness="5" BorderBrush="Black" Width="700" Height="500" Background="White">
-            <Canvas Name="BallCanvas" Width="700" Height="500">
+        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Top">
+            <Border BorderThickness="3" BorderBrush="Black" Background="Aqua" Width="703" Height="503">
                 <ItemsControl ItemsSource="{Binding Balls}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
@@ -32,7 +32,9 @@
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
-            </Canvas>
-        </Border>
+            </Border>
+            <Button Content="Generuj nowe kulki" Width="200" Height="40" Margin="10"
+                    Command="{Binding RestartSimulationCommand}" />
+        </StackPanel>
     </Grid>
 </Window>

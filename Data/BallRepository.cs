@@ -5,16 +5,15 @@ namespace ConcurrentProgramming.Data
 {
     public class BallRepository
     {
-        public ObservableCollection<Ball> Balls { get; private set; }
-
+        private ObservableCollection<Ball> balls;
         public BallRepository()
         {
-            Balls = new ObservableCollection<Ball>();
+            this.balls = [];
         }
-
+        public ObservableCollection<Ball> Balls { get => balls; set => balls = value; }
         public void AddBall(int positionX, int positionY)
         {
-            Balls.Add(new Ball(positionX, positionY));
+            balls.Add(new Ball(positionX, positionY));
         }
     }
 }
