@@ -11,17 +11,6 @@
 	<RootNamespace>ConcurrentProgramming.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
   </PropertyGroup>
 
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-		<NoWarn>1701;1702;IDE0001</NoWarn>
-	</PropertyGroup>	
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-		<NoWarn>1701;1702;IDE0001</NoWarn>
-	</PropertyGroup>
-
-	<ItemGroup>
-		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-	</ItemGroup>
-
 	<ItemGroup>
 		<ProjectReference Include="..\PresentationViewModel\PresentationViewModel.csproj" />
 	</ItemGroup>

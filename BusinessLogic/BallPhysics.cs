@@ -1,23 +1,32 @@
 ﻿using ConcurrentProgramming.Data;
+using ConcurrentProgramming.PresentationModel;
 
 namespace ConcurrentProgramming.BusinessLogic
 {
     public class BallPhysics
     {
-        BallRepository ballRepository;
+        private BallRepository ballRepository;
         Random random = new();
         private CancellationTokenSource cancellationTokenSource = new();
 
         public BallPhysics(BallRepository ballRepository)
         {
-            this.ballRepository = ballRepository;
+            this.BallRepository = ballRepository;
         }
+
+        public BallRepository BallRepository { get => ballRepository; set => ballRepository = value; }
+
+        public void AddBall(int positionX, int positionY)
+        {
+            ballRepository.Balls.Add(new Ball(positionX, positionY));
+        }
+
         public void CreateBalls()
         {
-            ballRepository.Balls.Clear();
+            BallRepository.Balls.Clear();
             for (int i = 0; i < random.Next(5, 10); i++)
             {
-                ballRepository.AddBall(random.Next(0, 600), random.Next(0, 400));
+                AddBall(random.Next(0, 600), random.Next(0, 400));
             }
         }
 
@@ -28,7 +37,7 @@ namespace ConcurrentProgramming.BusinessLogic
             {
                 while (!cancellationTokenSource.Token.IsCancellationRequested)
                 {
-                    foreach (var ball in ballRepository.Balls)
+                    foreach (var ball in BallRepository.Balls)
                     {
                         ball.Move();
                     }
