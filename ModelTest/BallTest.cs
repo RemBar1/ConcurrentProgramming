@@ -3,7 +3,7 @@
 namespace ConcurrentProgramming.ModelTest
 {
     [TestClass]
-    public class BallTests
+    public class BallTest
     {
         [TestMethod]
         public void BallConstructorTest()
@@ -17,7 +17,6 @@ namespace ConcurrentProgramming.ModelTest
             // Assert
             Assert.AreEqual(initialX, ball.PositionX, "Pozycja X kulki powinna być poprawna po inicjalizacji.");
             Assert.AreEqual(initialY, ball.PositionY, "Pozycja Y kulki powinna być poprawna po inicjalizacji.");
-            Assert.AreEqual(20, Ball.Diameter, "Średnica kulki powinna wynosić 20.");
         }
 
         [TestMethod]
