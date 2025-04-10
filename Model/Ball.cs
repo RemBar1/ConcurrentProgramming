@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel;
 
-namespace ConcurrentProgramming.PresentationModel
+namespace ConcurrentProgramming.Model
 {
-    public class Ball : INotifyPropertyChanged
+    public class Ball : IBall
     {
         private int positionX;
         private int positionY;

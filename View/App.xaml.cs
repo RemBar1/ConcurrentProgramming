@@ -1,6 +1,6 @@
 ﻿using System.Windows;
 
-namespace ConcurrentProgramming.PresentationView
+namespace ConcurrentProgramming.View
 {
     /// <summary>
     /// Interaction logic for App.xaml

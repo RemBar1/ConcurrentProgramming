@@ -1,6 +1,6 @@
-﻿using ConcurrentProgramming.PresentationModel;
+﻿using ConcurrentProgramming.Model;
 
-namespace ConcurrentProgramming.PresentationModelTest
+namespace ConcurrentProgramming.ModelTest
 {
     [TestClass]
     public class BallTests

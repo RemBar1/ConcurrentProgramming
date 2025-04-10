@@ -1,18 +1,15 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>WinExe</OutputType>
-    <TargetFramework>net8.0-windows</TargetFramework>
-    <Nullable>enable</Nullable>
+    <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
-    <UseWPF>true</UseWPF>
-	<StartupObject>ConcurrentProgramming.PresentationView.App</StartupObject>
+    <Nullable>enable</Nullable>
 	<AssemblyName>ConcurrentProgramming.$(MSBuildProjectName)</AssemblyName>
 	<RootNamespace>ConcurrentProgramming.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
   </PropertyGroup>
-
+	
 	<ItemGroup>
-		<ProjectReference Include="..\PresentationViewModel\PresentationViewModel.csproj" />
+		<ProjectReference Include="..\Logic\Logic.csproj" />
 	</ItemGroup>
 
 </Project>

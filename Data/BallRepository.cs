@@ -1,18 +1,23 @@
-﻿using ConcurrentProgramming.PresentationModel;
+﻿using ConcurrentProgramming.Model;
 using System.Collections.ObjectModel;
 
 namespace ConcurrentProgramming.Data
 {
-    public class BallRepository
+    public class BallRepository : IBallRepository
     {
-        private ObservableCollection<Ball> balls;
+        private ObservableCollection<IBall> balls = new();
 
-        public BallRepository()
+        public ObservableCollection<IBall> Balls { get => balls; set => balls = value; }
+
+        public void AddBall(int x, int y)
         {
-            this.balls = [];
+            IBall ball = new Ball(x, y);
+            balls.Add(ball);
         }
 
-        public ObservableCollection<Ball> Balls { get => balls; set => balls = value; }
-
+        public void Clear()
+        {
+            balls.Clear();
+        }
     }
 }

@@ -1,7 +1,7 @@
-﻿using ConcurrentProgramming.BusinessLogic;
+﻿using ConcurrentProgramming.Logic;
 using ConcurrentProgramming.Data;
 
-namespace ConcurrentProgramming.BusinessLogicTest
+namespace ConcurrentProgramming.LogicTest
 {
     [TestClass]
     public class BallPhysicsTests
