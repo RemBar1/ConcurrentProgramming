@@ -12,10 +12,9 @@ namespace ConcurrentProgramming.View
         public MainWindow()
         {
             InitializeComponent();
-
-            InitializeComponent();
+            BallCountTextBox.Focus();
             var repository = new BallRepository();
-            var physics = new BallPhysics(repository);
+            var physics = new BallService(repository);
             viewModel = new MainWindowViewModel(physics, repository);
             DataContext = viewModel;
         }

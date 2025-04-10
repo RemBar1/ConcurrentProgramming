@@ -7,6 +7,7 @@ namespace ConcurrentProgramming.ViewModel
     public interface IMainWindowViewModel
     {
         ObservableCollection<IBall> Balls { get; }
-        ICommand RestartSimulationCommand { get; }
+        ICommand StartSimulationCommand { get; }
+        ICommand StopSimulationCommand { get; }
     }
 }

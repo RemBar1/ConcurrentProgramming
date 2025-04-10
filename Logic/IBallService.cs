@@ -1,9 +1,9 @@
 ﻿namespace ConcurrentProgramming.Logic
 {
-    public interface IBallPhysics
+    public interface IBallService
     {
         void StartSimulation();
         void StopSimulation();
-        void CreateBalls();
+        void CreateBalls(int count);
     }
 }

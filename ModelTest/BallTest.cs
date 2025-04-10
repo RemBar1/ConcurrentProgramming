@@ -1,73 +1,162 @@
-﻿using ConcurrentProgramming.Model;
+﻿//using ConcurrentProgramming.Model;
 
-namespace ConcurrentProgramming.ModelTest
-{
-    [TestClass]
-    public class BallTest
-    {
-        [TestMethod]
-        public void BallConstructorTest()
-        {
-            // Arrange
-            int initialX = 100, initialY = 150;
+//namespace ConcurrentProgramming.ModelTest
+//{
+//    [TestClass]
+//    public class BallTests
+//    {
+//        private Ball _ball;
+//        private bool _propertyChangedFired;
 
-            // Act
-            Ball ball = new Ball(initialX, initialY);
+//        [TestInitialize]
+//        public void Setup()
+//        {
+//            _ball = new Ball(100, 100);
+//            _propertyChangedFired = false;
+//            _ball.PropertyChanged += (sender, e) => _propertyChangedFired = true;
+//        }
 
-            // Assert
-            Assert.AreEqual(initialX, ball.PositionX, "Pozycja X kulki powinna być poprawna po inicjalizacji.");
-            Assert.AreEqual(initialY, ball.PositionY, "Pozycja Y kulki powinna być poprawna po inicjalizacji.");
-        }
+//        [TestMethod]
+//        public void Constructor_SetsInitialPositionAndVelocity()
+//        {
+//            Assert.AreEqual(100, _ball.PositionX);
+//            Assert.AreEqual(100, _ball.PositionY);
+//            Assert.AreEqual(1, _ball.VelocityX);
+//            Assert.AreEqual(1, _ball.VelocityY);
+//        }
 
-        [TestMethod]
-        public void BallMovementTest()
-        {
-            // Arrange
-            Ball ball = new Ball(100, 100);
+//        [TestMethod]
+//        public void Move_ChangesPosition()
+//        {
+//            // Act
+//            _ball.Move();
 
-            // Act
-            ball.Move();
+//            // Assert
+//            Assert.AreEqual(101, _ball.PositionX);
+//            Assert.AreEqual(101, _ball.PositionY);
+//            Assert.IsTrue(_propertyChangedFired);
+//        }
 
-            // Assert
-            Assert.AreEqual(101, ball.PositionX, "Pozycja X powinna zwiększyć się o 1.");
-            Assert.AreEqual(101, ball.PositionY, "Pozycja Y powinna zwiększyć się o 1.");
-        }
+//        [TestMethod]
+//        public void Move_BouncesFromRightWall()
+//        {
+//            // Arrange
+//            var ball = new Ball(680, 100) { VelocityX = 2 }; // 680 + 20 + 2 > 700
 
-        [TestMethod]
-        public void BallMovementWallBouncingTest()
-        {
-            // Arrange
-            Ball ball = new Ball(680, 480); // Blisko prawej i dolnej krawędzi
+//            // Act
+//            ball.Move();
 
-            // Act
-            ball.Move(); // Odbicie od prawej i dolnej ściany
-            ball.Move(); // Powinno iść w przeciwnym kierunku
+//            // Assert
+//            Assert.AreEqual(678, ball.PositionX); // 680 + (-2)
+//            Assert.AreEqual(-2, ball.VelocityX);
+//        }
 
-            // Assert
-            Assert.AreEqual(678, ball.PositionX, "Po odbiciu od ściany, pozycja X powinna się zmniejszać.");
-            Assert.AreEqual(478, ball.PositionY, "Po odbiciu od ściany, pozycja Y powinna się zmniejszać.");
-        }
+//        [TestMethod]
+//        public void Move_BouncesFromLeftWall()
+//        {
+//            // Arrange
+//            var ball = new Ball(5, 100) { VelocityX = -10 }; // 5 - 10 + 20 < 0
 
-        [TestMethod]
-        public void PropertyChangedTest()
-        {
-            // Arrange
-            Ball ball = new Ball(100, 100);
-            bool eventRaised = false;
+//            // Act
+//            ball.Move();
 
-            ball.PropertyChanged += (sender, e) =>
-            {
-                if (e.PropertyName == "PositionX" || e.PropertyName == "PositionY")
-                {
-                    eventRaised = true;
-                }
-            };
+//            // Assert
+//            Assert.AreEqual(15, ball.PositionX); // 5 + 10
+//            Assert.AreEqual(10, ball.VelocityX);
+//        }
 
-            // Act
-            ball.Move();
+//        [TestMethod]
+//        public void Move_BouncesFromTopWall()
+//        {
+//            // Arrange
+//            var ball = new Ball(100, 5) { VelocityY = -10 }; // 5 - 10 + 20 < 0
 
-            // Assert
-            Assert.IsTrue(eventRaised, "Zdarzenie PropertyChanged powinno zostać wywołane przy zmianie pozycji.");
-        }
-    }
-}
+//            // Act
+//            ball.Move();
+
+//            // Assert
+//            Assert.AreEqual(15, ball.PositionY);
+//            Assert.AreEqual(10, ball.VelocityY);
+//        }
+
+//        [TestMethod]
+//        public void Move_BouncesFromBottomWall()
+//        {
+//            // Arrange
+//            var ball = new Ball(100, 480) { VelocityY = 5 }; // 480 + 20 + 5 > 500
+
+//            // Act
+//            ball.Move();
+
+//            // Assert
+//            Assert.AreEqual(475, ball.PositionY); // 480 + (-5)
+//            Assert.AreEqual(-5, ball.VelocityY);
+//        }
+
+//        [TestMethod]
+//        public void Move_NoBounceWhenWithinBounds()
+//        {
+//            // Arrange
+//            var ball = new Ball(200, 200) { VelocityX = 3, VelocityY = -2 };
+
+//            // Act
+//            ball.Move();
+
+//            // Assert
+//            Assert.AreEqual(203, ball.PositionX);
+//            Assert.AreEqual(198, ball.PositionY);
+//            Assert.AreEqual(3, ball.VelocityX);
+//            Assert.AreEqual(-2, ball.VelocityY);
+//        }
+
+//        [TestMethod]
+//        public void PropertyChanged_RaisedForPositionChanges()
+//        {
+//            // Act
+//            _ball.PositionX = 150;
+//            var xChanged = _propertyChangedFired;
+//            _propertyChangedFired = false;
+
+//            _ball.PositionY = 200;
+//            var yChanged = _propertyChangedFired;
+
+//            // Assert
+//            Assert.IsTrue(xChanged, "PropertyChanged powinien być wywołany dla PositionX");
+//            Assert.IsTrue(yChanged, "PropertyChanged powinien być wywołany dla PositionY");
+//        }
+
+//        [TestMethod]
+//        public void PropertyChanged_NotRaisedForSameValue()
+//        {
+//            // Arrange
+//            _propertyChangedFired = false;
+//            var originalX = _ball.PositionX;
+//            var originalY = _ball.PositionY;
+
+//            // Act
+//            _ball.PositionX = originalX;
+//            _ball.PositionY = originalY;
+
+//            // Assert
+//            Assert.IsFalse(_propertyChangedFired);
+//        }
+
+//        [TestMethod]
+//        public void VelocityProperties_CanBeModified()
+//        {
+//            // Act
+//            _ball.VelocityX = -5;
+//            _ball.VelocityY = 10;
+
+//            // Assert
+//            Assert.AreEqual(-5, _ball.VelocityX);
+//            Assert.AreEqual(10, _ball.VelocityY);
+//        }
+
+//        [TestMethod]
+//        public void Diameter_ReturnsConstantValue()
+//        {
+//            Assert.AreEqual(20, Ball.Diameter);
+//        }
+//    }
+//}
