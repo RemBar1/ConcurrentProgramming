@@ -7,8 +7,8 @@ namespace ConcurrentProgramming.Model
     {
         private int positionX;
         private int positionY;
-        private const int MaxWidth = 700;
-        private const int MaxHeight = 500;
+        private const int maxWidth = 700;
+        private const int maxHeight = 500;
         private const int BallDiameter = 20;
         private VectorTo velocity;
 
@@ -53,20 +53,24 @@ namespace ConcurrentProgramming.Model
 
         public static int Diameter => BallDiameter;
 
+        public static int MaxWidth => maxWidth;
+
+        public static int MaxHeight => maxHeight;
+
         public void Move()
         {
             int newX = positionX + velocity.X;
             int newY = positionY + velocity.Y;
 
-            if (newX < 0 || newX + BallDiameter > MaxWidth)
+            if (newX < 0 || newX + BallDiameter > maxWidth)
             {
                 velocity.X = -velocity.X;
-                newX = Math.Clamp(newX, 0, MaxWidth - BallDiameter);
+                newX = Math.Clamp(newX, 0, maxWidth - BallDiameter);
             }
-            if (newY < 0 || newY + BallDiameter > MaxHeight)
+            if (newY < 0 || newY + BallDiameter > maxHeight)
             {
                 velocity.Y = -velocity.Y;
-                newY = Math.Clamp(newY, 0, MaxHeight - BallDiameter);
+                newY = Math.Clamp(newY, 0, maxHeight - BallDiameter);
             }
 
             PositionX = newX;
