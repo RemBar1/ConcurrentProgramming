@@ -5,14 +5,21 @@ using ConcurrentProgramming.Model;
 namespace ConcurrentProgramming.LogicTest
 {
     [TestClass]
-    public class BallServiceTests
+    public class BallServiceTest
     {
+        private BallRepository repository;
+        private BallService service;
+
+        [TestInitialize]
+        public void Initialize()
+        {
+            repository = new BallRepository();
+            service = new BallService(repository, 700, 500, 0);
+        }
+
         [TestMethod]
         public void CreateBallsTest()
         {
-            var repository = new BallRepository();
-            var service = new BallService(repository, 700, 500, 0);
-
             service.CreateBalls(5);
 
             Assert.AreEqual(5, repository.Balls.Count);
@@ -21,9 +28,6 @@ namespace ConcurrentProgramming.LogicTest
         [TestMethod]
         public void CreateBallsCorrectPositionsTest()
         {
-            var repository = new BallRepository();
-            var service = new BallService(repository, 700, 500, 0);
-
             service.CreateBalls(10);
 
             for (int i = 0; i < repository.Balls.Count; i++)
@@ -33,8 +37,8 @@ namespace ConcurrentProgramming.LogicTest
                     var ball1 = repository.Balls[i];
                     var ball2 = repository.Balls[j];
                     Assert.IsFalse(
-                        Math.Abs(ball1.PositionX - ball2.PositionX) < Ball.Diameter &&
-                        Math.Abs(ball1.PositionY - ball2.PositionY) < Ball.Diameter
+                        Math.Abs(ball1.PositionX - ball2.PositionX) < 20 &&
+                        Math.Abs(ball1.PositionY - ball2.PositionY) < 20
                     );
                 }
             }
@@ -43,9 +47,7 @@ namespace ConcurrentProgramming.LogicTest
         [TestMethod]
         public void StartStopSimulationTest()
         {
-            var repository = new BallRepository();
-            var service = new BallService(repository, 700, 500, 0);
-            var ball = new Ball(100, 100, 700, 500);
+            var ball = new Ball(100, 100);
             repository.Add(ball);
 
             service.StartSimulation();
@@ -54,6 +56,62 @@ namespace ConcurrentProgramming.LogicTest
 
             Assert.AreNotEqual(100, ball.PositionX);
             Assert.AreNotEqual(100, ball.PositionY);
+        }
+
+
+        [TestMethod]
+        public void MoveBallTest()
+        {
+            var ball = new Ball(100, 100) { Velocity = new VectorTo(5, 10) };
+            repository.Add(ball);
+
+            service.MoveBall(ball);
+
+            Assert.AreEqual(105, ball.PositionX);
+            Assert.AreEqual(110, ball.PositionY);
+        }
+        [TestMethod]
+        public void MoveBallShouldBounceFromLeftWallTest()
+        {
+            var ball = new Ball(0, 100) { Velocity = new VectorTo(-5, 2), Diameter = 20 };
+
+            service.MoveBall(ball);
+
+            Assert.AreEqual(5, ball.Velocity.X);
+            Assert.AreEqual(0, ball.PositionX);
+        }
+
+        [TestMethod]
+        public void MoveBallShouldBounceFromRightWallTest()
+        {
+            var ball = new Ball(680, 100) { Velocity = new VectorTo(5, 2), Diameter = 20 };
+
+            service.MoveBall(ball);
+
+            Assert.AreEqual(-5, ball.Velocity.X);
+            Assert.AreEqual(680, ball.PositionX);
+        }
+
+        [TestMethod]
+        public void MoveBallShouldBounceFromTopWallTest()
+        {
+            var ball = new Ball(100, 0) { Velocity = new VectorTo(2, -5), Diameter = 20 };
+
+            service.MoveBall(ball);
+
+            Assert.AreEqual(5, ball.Velocity.Y);
+            Assert.AreEqual(0, ball.PositionY);
+        }
+
+        [TestMethod]
+        public void MoveBallShouldBounceFromBottomWallTest()
+        {
+            var ball = new Ball(100, 480) { Velocity = new VectorTo(2, 5), Diameter = 20 };
+
+            service.MoveBall(ball);
+
+            Assert.AreEqual(-5, ball.Velocity.Y);
+            Assert.AreEqual(480, ball.PositionY);
         }
     }
 }

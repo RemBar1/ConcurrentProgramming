@@ -4,13 +4,13 @@ using ConcurrentProgramming.Model;
 namespace ConcurrentProgramming.DataTest
 {
     [TestClass]
-    public class BallRepositoryTests
+    public class BallRepositoryTest
     {
         [TestMethod]
         public void AddAddBallToCollectionTest()
         {
             var repository = new BallRepository();
-            var ball = new Ball(0, 0, 700, 500);
+            var ball = new Ball(0, 0);
 
             repository.Add(ball);
 
@@ -22,8 +22,8 @@ namespace ConcurrentProgramming.DataTest
         public void ClearTest()
         {
             var repository = new BallRepository();
-            repository.Add(new Ball(0, 0, 700, 500));
-            repository.Add(new Ball(10, 10, 700, 500));
+            repository.Add(new Ball(0, 0));
+            repository.Add(new Ball(10, 10));
 
             Assert.AreEqual(2, repository.Balls.Count);
 

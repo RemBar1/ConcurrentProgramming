@@ -3,79 +3,60 @@
 namespace ConcurrentProgramming.ModelTest
 {
     [TestClass]
-    public class BallTests
+    public class BallTest
     {
         [TestMethod]
-        public void MoveTest()
+        public void ConstructorTest()
         {
-            var ball = new Ball(100, 100, 700, 500);
+            var ball = new Ball(10, 20);
 
-            ball.Move();
-
-            Assert.AreEqual(101, ball.PositionX);
-            Assert.AreEqual(101, ball.PositionY);
+            Assert.AreEqual(10, ball.PositionX);
+            Assert.AreEqual(20, ball.PositionY);
+            Assert.AreEqual(20, ball.Diameter);
+            Assert.AreEqual(1, ball.Velocity.X);
+            Assert.AreEqual(1, ball.Velocity.Y);
         }
 
         [TestMethod]
-        public void MoveBounceFromRightWallTest()
+        public void PropertiesChangesTest()
         {
-            var ball = new Ball(680, 100, 700, 500) { Velocity = new VectorTo(5, 0) };
+            var ball = new Ball(10, 20);
 
-            ball.Move();
+            ball.PositionX = 30;
+            ball.PositionY = 40;
+            ball.Diameter = 30;
 
-            Assert.AreEqual(-5, ball.Velocity.X);
-            Assert.AreEqual(680, ball.PositionX);
+            Assert.AreEqual(40, ball.PositionY);
+            Assert.AreEqual(30, ball.PositionX);
+            Assert.AreEqual(30, ball.Diameter);
         }
 
         [TestMethod]
-        public void MoveBounceFromLeftWallTest()
+        public void PropertyChangedTrueAndFalseTest()
         {
-            var ball = new Ball(0, 100, 700, 500) { Velocity = new VectorTo(-5, 0) };
+            var ball = new Ball(10, 20);
+            var eventRaised = false;
+            ball.PropertyChanged += (s, e) => eventRaised = true;
 
-            ball.Move();
+            ball.PositionX = 10;
+
+            Assert.IsFalse(eventRaised);
+
+            ball.PositionX = 20;
+
+            Assert.IsTrue(eventRaised);
+        }
+
+        [TestMethod]
+        public void BallVelocityTest()
+        {
+            var ball = new Ball(10, 20);
+            var newVelocity = new VectorTo(5, 10);
+
+            ball.Velocity = newVelocity;
 
             Assert.AreEqual(5, ball.Velocity.X);
-            Assert.AreEqual(0, ball.PositionX);
-        }
-
-        [TestMethod]
-        public void MoveBounceFromBottomWallTest()
-        {
-            var ball = new Ball(100, 480, 700, 500) { Velocity = new VectorTo(0, 5) };
-
-            ball.Move();
-
-            Assert.AreEqual(-5, ball.Velocity.Y);
-            Assert.AreEqual(480, ball.PositionY);
-        }
-
-        [TestMethod]
-        public void MoveBounceFromTopWallTest()
-        {
-            var ball = new Ball(100, 0, 700, 500) { Velocity = new VectorTo(0, -5) };
-
-            ball.Move();
-
-            Assert.AreEqual(5, ball.Velocity.Y);
-            Assert.AreEqual(0, ball.PositionY);
-        }
-
-        [TestMethod]
-        public void MoveMultipleBouncesTest()
-        {
-            var ball = new Ball(680, 480, 700, 500) { Velocity = new VectorTo(5, 5) };
-
-            ball.Move();
-
-            Assert.AreEqual(-5, ball.Velocity.X);
-            Assert.AreEqual(-5, ball.Velocity.Y);
-            Assert.AreEqual(680, ball.PositionX);
-            Assert.AreEqual(480, ball.PositionY);
-
-            ball.Move();
-
-            Assert.AreEqual(675, ball.PositionX);
-            Assert.AreEqual(475, ball.PositionY);
+            Assert.AreEqual(10, ball.Velocity.Y);
         }
     }
 }

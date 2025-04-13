@@ -23,7 +23,7 @@ namespace ConcurrentProgramming.ViewModel
         public int BallCount
         {
             get => ballCount;
-            set => ballCount = Math.Clamp(value, 1, 20);
+            set => ballCount = Math.Clamp(value, 1, 50);
         }
 
         public MainWindowViewModel()
