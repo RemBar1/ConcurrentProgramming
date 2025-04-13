@@ -6,15 +6,16 @@
        xmlns:model="clr-namespace:ConcurrentProgramming.Model;assembly=ConcurrentProgramming.Model" 
        d:DataContext="{d:DesignInstance Type=model:Ball}"
        mc:Ignorable="d"
-       Title="Symulacja Kul" Height="600" Width="800">
+       Title="Symulacja Kul"
+       WindowState="Maximized">
 
-   <Grid>
+    <Grid>
        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Top">
-           <!-- Kontrolka do wyboru liczby kul -->
+           <!-- Kontrolki sterujące -->
            <StackPanel Orientation="Horizontal" Margin="0,10">
-               <TextBlock Text="Liczba kul (max 10): " VerticalAlignment="Center" Margin="5,0"/>
+               <TextBlock Text="Liczba kul (max 0): " VerticalAlignment="Center" Margin="5,0"/>
                <TextBox x:Name="BallCountTextBox" Width="50" Text="{Binding BallCount, UpdateSourceTrigger=PropertyChanged}">
-                   <!-- Alternatywnie: Enter w TextBox (bez Window.InputBindings) -->
+                   <!-- Alternatywnie: Enter w TextBox -->
                    <TextBox.InputBindings>
                        <KeyBinding Key="Enter" Command="{Binding StartSimulationCommand}"/>
                    </TextBox.InputBindings>

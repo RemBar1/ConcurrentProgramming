@@ -3,6 +3,7 @@ using ConcurrentProgramming.Logic;
 using ConcurrentProgramming.Model;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
+using System.Windows;
 
 namespace ConcurrentProgramming.ViewModel
 {
@@ -15,18 +16,21 @@ namespace ConcurrentProgramming.ViewModel
         public ObservableCollection<IBall> Balls => ballRepository.Balls;
         public ICommand StartSimulationCommand { get; }
         public ICommand StopSimulationCommand { get; }
-        public int BoardWidth { get; } = 700;
-        public int BoardHeight { get; } = 500;
+        public int BoardWidth { get; private set; }
+        public int BoardHeight { get; private set; }
         public int BoardThickness { get; } = 3;
 
         public int BallCount
         {
             get => ballCount;
-            set => ballCount = Math.Clamp(value, 1, 10);
+            set => ballCount = Math.Clamp(value, 1, 20);
         }
 
         public MainWindowViewModel()
         {
+            BoardWidth = (int)(SystemParameters.PrimaryScreenWidth * 0.75);
+            BoardHeight = (int)(SystemParameters.PrimaryScreenHeight * 0.75);
+
             ballRepository = new BallRepository();
             ballService = new BallService(ballRepository, BoardWidth, BoardHeight, BoardThickness);
             StartSimulationCommand = new RelayCommand(StartSimulation);

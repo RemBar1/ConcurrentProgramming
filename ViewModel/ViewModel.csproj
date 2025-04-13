@@ -7,7 +7,11 @@
 	<AssemblyName>ConcurrentProgramming.$(MSBuildProjectName)</AssemblyName>
 	<RootNamespace>ConcurrentProgramming.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
   </PropertyGroup>
-	
+
+	<ItemGroup>
+		<FrameworkReference Include="Microsoft.WindowsDesktop.App.WPF" />
+	</ItemGroup>
+
 	<ItemGroup>
 		<ProjectReference Include="..\Logic\Logic.csproj" />
 	</ItemGroup>
