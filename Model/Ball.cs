@@ -1,14 +1,13 @@
 ﻿using System.ComponentModel;
-using System.Numerics;
 
 namespace ConcurrentProgramming.Model
 {
-    public class Ball : IBall
+    public class Ball : IBall, INotifyPropertyChanged
     {
         private int positionX;
         private int positionY;
-        private const int maxWidth = 700;
-        private const int maxHeight = 500;
+        private readonly int boardWidth;
+        private readonly int boardHeight;
         private const int BallDiameter = 20;
         private VectorTo velocity;
 
@@ -18,13 +17,17 @@ namespace ConcurrentProgramming.Model
             set => velocity = value;
         }
 
-        public Ball(int positionX, int positionY)
+        public Ball(int positionX, int positionY, int boardWidth, int boardHeight)
         {
             this.positionX = positionX;
             this.positionY = positionY;
-            this.velocity = new VectorTo(1, 1);
+            this.boardWidth = boardWidth;
+            this.boardHeight = boardHeight;
+            velocity = new VectorTo(1, 1);
         }
-        public event PropertyChangedEventHandler PropertyChanged;
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+
         public int PositionX
         {
             get => positionX;
@@ -53,24 +56,20 @@ namespace ConcurrentProgramming.Model
 
         public static int Diameter => BallDiameter;
 
-        public static int MaxWidth => maxWidth;
-
-        public static int MaxHeight => maxHeight;
-
         public void Move()
         {
             int newX = positionX + velocity.X;
             int newY = positionY + velocity.Y;
 
-            if (newX < 0 || newX + BallDiameter > maxWidth)
+            if (newX < 0 || newX + BallDiameter > boardWidth)
             {
                 velocity.X = -velocity.X;
-                newX = Math.Clamp(newX, 0, maxWidth - BallDiameter);
+                newX = Math.Clamp(newX, 0, boardWidth - BallDiameter);
             }
-            if (newY < 0 || newY + BallDiameter > maxHeight)
+            if (newY < 0 || newY + BallDiameter > boardHeight)
             {
                 velocity.Y = -velocity.Y;
-                newY = Math.Clamp(newY, 0, maxHeight - BallDiameter);
+                newY = Math.Clamp(newY, 0, boardHeight - BallDiameter);
             }
 
             PositionX = newX;

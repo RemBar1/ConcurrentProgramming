@@ -6,49 +6,51 @@ namespace ConcurrentProgramming.Logic
     public class BallService : IBallService
     {
         private readonly IBallRepository ballRepository;
+        private readonly int boardWidth;
+        private readonly int boardHeight;
         private readonly object lockObject = new object();
         private CancellationTokenSource cts = new();
 
-        public BallService(IBallRepository repository) => ballRepository = repository;
+        public BallService(IBallRepository repository, int boardWidth, int boardHeight, int boardThickness)
+        {
+            ballRepository = repository;
+            this.boardWidth = boardWidth - boardThickness;
+            this.boardHeight = boardHeight - boardThickness;
+        }
 
+        public void AddBall(int ballPositionX, int ballPositionY, int ballBoardWidth, int ballBoardHeight)
+        {
+            ballRepository.Add(new Ball(ballPositionX, ballPositionY, ballBoardWidth, ballBoardHeight));
+        }
         public void CreateBalls(int count)
         {
             ballRepository.Clear();
             var random = new Random();
-            const int maxAttempts = 100; // Maksymalna liczba prób losowania pozycji na kulkę
 
             for (int i = 0; i < count; i++)
             {
-                int attempts = 0;
                 bool positionValid;
-                int x, y;
+                int positionX, positionY;
 
                 do
                 {
-                    x = random.Next(0, Ball.MaxWidth - Ball.Diameter);
-                    y = random.Next(0, Ball.MaxHeight - Ball.Diameter);
+                    positionX = random.Next(0, boardWidth - Ball.Diameter);
+                    positionY = random.Next(0, boardHeight - Ball.Diameter);
                     positionValid = true;
 
-                    // Sprawdzenie kolizji z istniejącymi kulkami
                     foreach (var existingBall in ballRepository.Balls)
                     {
-                        if (Math.Abs(existingBall.PositionX - x) < Ball.Diameter &&
-                            Math.Abs(existingBall.PositionY - y) < Ball.Diameter)
+                        if (Math.Abs(existingBall.PositionX - positionX) < Ball.Diameter &&
+                            Math.Abs(existingBall.PositionY - positionY) < Ball.Diameter)
                         {
                             positionValid = false;
                             break;
                         }
                     }
 
-                    attempts++;
-                    if (attempts >= maxAttempts)
-                    {
-                        throw new InvalidOperationException("Nie udało się wygenerować kuli bez kolizji.");
-                    }
-
                 } while (!positionValid);
 
-                ballRepository.AddBall(x, y);
+                AddBall(positionX, positionY, boardWidth, boardHeight);
             }
         }
 
@@ -80,5 +82,4 @@ namespace ConcurrentProgramming.Logic
             }
         }
     }
-
 }

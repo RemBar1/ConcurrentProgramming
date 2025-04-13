@@ -1,6 +1,4 @@
-﻿using ConcurrentProgramming.Data;
-using ConcurrentProgramming.Logic;
-using ConcurrentProgramming.ViewModel;
+﻿using ConcurrentProgramming.ViewModel;
 using System.Windows;
 
 namespace ConcurrentProgramming.View
@@ -13,9 +11,7 @@ namespace ConcurrentProgramming.View
         {
             InitializeComponent();
             BallCountTextBox.Focus();
-            var repository = new BallRepository();
-            var physics = new BallService(repository);
-            viewModel = new MainWindowViewModel(physics, repository);
+            viewModel = new MainWindowViewModel();
             DataContext = viewModel;
         }
 

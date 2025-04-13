@@ -7,8 +7,7 @@ namespace ConcurrentProgramming.Model
         int PositionX { get; }
         int PositionY { get; }
 
-        event PropertyChangedEventHandler PropertyChanged;
-
+        new event PropertyChangedEventHandler PropertyChanged;
         void Move();
     }
 }
