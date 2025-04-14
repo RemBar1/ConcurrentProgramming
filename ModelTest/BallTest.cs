@@ -8,7 +8,7 @@ namespace ConcurrentProgramming.ModelTest
         [TestMethod]
         public void ConstructorTest()
         {
-            var ball = new Ball(10, 20);
+            var ball = new Ball(10, 20, 20);
 
             Assert.AreEqual(10, ball.PositionX);
             Assert.AreEqual(20, ball.PositionY);
@@ -20,7 +20,7 @@ namespace ConcurrentProgramming.ModelTest
         [TestMethod]
         public void PropertiesChangesTest()
         {
-            var ball = new Ball(10, 20);
+            var ball = new Ball(10, 20, 10);
 
             ball.PositionX = 30;
             ball.PositionY = 40;
@@ -34,7 +34,7 @@ namespace ConcurrentProgramming.ModelTest
         [TestMethod]
         public void PropertyChangedTrueAndFalseTest()
         {
-            var ball = new Ball(10, 20);
+            var ball = new Ball(10, 20, 10);
             var eventRaised = false;
             ball.PropertyChanged += (s, e) => eventRaised = true;
 
@@ -50,7 +50,7 @@ namespace ConcurrentProgramming.ModelTest
         [TestMethod]
         public void BallVelocityTest()
         {
-            var ball = new Ball(10, 20);
+            var ball = new Ball(10, 20, 10);
             var newVelocity = new VectorTo(5, 10);
 
             ball.Velocity = newVelocity;

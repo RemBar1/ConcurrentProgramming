@@ -6,22 +6,16 @@ namespace ConcurrentProgramming.Model
     {
         private int positionX;
         private int positionY;
-        private int diameter = 20;
+        private int diameter;
         private VectorTo velocity;
 
-        public Ball(int positionX, int positionY)
+        public Ball(int positionX, int positionY, int diameter)
         {
             this.positionX = positionX;
             this.positionY = positionY;
+            this.diameter = diameter;
             velocity = new VectorTo(1, 1);
         }
-
-        public event PropertyChangedEventHandler? PropertyChanged;
-        public void OnPropertyChanged(string propertyName)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-
         public int PositionX
         {
             get => positionX;
@@ -63,6 +57,13 @@ namespace ConcurrentProgramming.Model
         {
             get => velocity;
             set => velocity = value;
+        }
+
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+        public void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

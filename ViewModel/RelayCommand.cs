@@ -14,7 +14,9 @@ namespace ConcurrentProgramming.ViewModel
         }
 
         public bool CanExecute(object parameter) => canExecute == null || canExecute();
+
         public void Execute(object parameter) => execute();
+
         public event EventHandler CanExecuteChanged;
     }
 }

@@ -18,9 +18,9 @@ namespace ConcurrentProgramming.Logic
             this.boardHeight = boardHeight - boardThickness;
         }
 
-        public void AddBall(int ballPositionX, int ballPositionY)
+        public void AddBall(int ballPositionX, int ballPositionY, int diameter)
         {
-            ballRepository.Add(new Ball(ballPositionX, ballPositionY));
+            ballRepository.Add(new Ball(ballPositionX, ballPositionY, diameter));
         }
 
         public void MoveBall(IBall ball)
@@ -43,7 +43,7 @@ namespace ConcurrentProgramming.Logic
             ball.PositionX = newX;
             ball.PositionY = newY;
         }
-        public void CreateBalls(int count)
+        public void CreateBalls(int count, int diameter)
         {
             ballRepository.Clear();
             var random = new Random();
@@ -55,14 +55,14 @@ namespace ConcurrentProgramming.Logic
 
                 do
                 {
-                    positionX = random.Next(0, boardWidth - 20);
-                    positionY = random.Next(0, boardHeight - 20);
+                    positionX = random.Next(0, boardWidth - diameter);
+                    positionY = random.Next(0, boardHeight - diameter);
                     positionValid = true;
 
                     foreach (var existingBall in ballRepository.Balls)
                     {
-                        if (Math.Abs(existingBall.PositionX - positionX) < 20 &&
-                            Math.Abs(existingBall.PositionY - positionY) < 20)
+                        if (Math.Abs(existingBall.PositionX - positionX) < diameter &&
+                            Math.Abs(existingBall.PositionY - positionY) < diameter)
                         {
                             positionValid = false;
                             break;
@@ -71,7 +71,7 @@ namespace ConcurrentProgramming.Logic
 
                 } while (!positionValid);
 
-                AddBall(positionX, positionY);
+                AddBall(positionX, positionY, diameter);
             }
         }
 

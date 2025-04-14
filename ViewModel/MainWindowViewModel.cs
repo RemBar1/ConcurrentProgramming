@@ -2,8 +2,9 @@
 using ConcurrentProgramming.Logic;
 using ConcurrentProgramming.Model;
 using System.Collections.ObjectModel;
-using System.Windows.Input;
+using System.ComponentModel;
 using System.Windows;
+using System.Windows.Input;
 
 namespace ConcurrentProgramming.ViewModel
 {
@@ -12,13 +13,15 @@ namespace ConcurrentProgramming.ViewModel
         private readonly IBallService ballService;
         private readonly IBallRepository ballRepository;
         private int ballCount;
+        private int selectedDiameter = 20;
 
         public ObservableCollection<IBall> Balls => ballRepository.Balls;
         public ICommand StartSimulationCommand { get; }
         public ICommand StopSimulationCommand { get; }
-        public int BoardWidth { get; private set; }
-        public int BoardHeight { get; private set; }
-        public int BoardThickness { get; } = 3;
+        public ICommand ChangeDiameterCommand { get; }
+        public int BoardWidth { get; set; }
+        public int BoardHeight { get; set; }
+        public int BoardThickness { get; set; } = 3;
 
         public int BallCount
         {
@@ -35,15 +38,46 @@ namespace ConcurrentProgramming.ViewModel
             ballService = new BallService(ballRepository, BoardWidth, BoardHeight, BoardThickness);
             StartSimulationCommand = new RelayCommand(StartSimulation);
             StopSimulationCommand = new RelayCommand(StopSimulation);
+            ChangeDiameterCommand = new RelayCommand(UpdateBallsDiameter);
+        }
+
+        public int SelectedDiameter
+        {
+            get => selectedDiameter;
+            set
+            {
+                if (selectedDiameter != value)
+                {
+                    selectedDiameter = value;
+                    OnPropertyChanged(nameof(SelectedDiameter));
+                    UpdateBallsDiameter();
+                }
+            }
+        }
+
+        public List<int> AvailableDiameters { get; } = new List<int> { 10, 20, 30, 50};
+
+        public void UpdateBallsDiameter()
+        {
+            foreach (var ball in Balls)
+            {
+                ball.Diameter = SelectedDiameter;
+            }
         }
 
         public void StartSimulation()
         {
             ballService.StopSimulation();
-            ballService.CreateBalls(BallCount);
+            ballService.CreateBalls(BallCount, SelectedDiameter);
             ballService.StartSimulation();
         }
 
         public void StopSimulation() => ballService.StopSimulation();
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+        public void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
     }
 }

@@ -24,7 +24,11 @@
                        Command="{Binding StartSimulationCommand}"/>
                <Button Content="Stop" Width="60" Height="25" Margin="5,0"
                        Command="{Binding StopSimulationCommand}"/>
-           </StackPanel>
+                <TextBlock Text="Średnica kul: " VerticalAlignment="Center" Margin="5,0"/>
+                <ComboBox Width="60" 
+              ItemsSource="{Binding AvailableDiameters}"
+              SelectedValue="{Binding SelectedDiameter}"/>
+            </StackPanel>
            <!-- Plansza do symulacji -->
             <Border x:Name="Board" BorderBrush="Black" Background="Aqua" 
                    Width="{Binding BoardWidth}" Height="{Binding BoardHeight}" 
