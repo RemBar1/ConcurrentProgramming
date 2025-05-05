@@ -1,6 +1,5 @@
 ﻿using ConcurrentProgramming.Model;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Windows.Input;
 
 namespace ConcurrentProgramming.ViewModel
@@ -16,9 +15,7 @@ namespace ConcurrentProgramming.ViewModel
         int BoardThickness { get; set; }
         int BallCount { get; set; }
         int SelectedDiameter { get; set; }
-        event PropertyChangedEventHandler PropertyChanged;
         List<int> AvailableDiameters { get; }
-        void UpdateBallsDiameter();
         void StartSimulation();
         void StopSimulation();
 

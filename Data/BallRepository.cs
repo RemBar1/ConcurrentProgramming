@@ -5,18 +5,21 @@ namespace ConcurrentProgramming.Data
 {
     public class BallRepository : IBallRepository
     {
-        private ObservableCollection<IBall> balls = [];
-
-        public ObservableCollection<IBall> Balls { get => balls; set => balls = value; }
+        public ObservableCollection<IBall> Balls { get; set; } = [];
 
         public void Add(IBall ball)
         {
-            balls.Add(ball);
+            Balls.Add(ball);
         }
 
         public void Clear()
         {
-            balls.Clear();
+            Balls.Clear();
+        }
+
+        public IReadOnlyList<IBall> GetAll()
+        {
+            return Balls.ToList();
         }
     }
 }

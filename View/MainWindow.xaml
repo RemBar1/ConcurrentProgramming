@@ -39,13 +39,13 @@
                            <Canvas />
                        </ItemsPanelTemplate>
                    </ItemsControl.ItemsPanel>
-                   <ItemsControl.ItemContainerStyle>
-                       <Style TargetType="ContentPresenter">
-                           <Setter Property="Canvas.Left" Value="{Binding PositionX}" />
-                           <Setter Property="Canvas.Top" Value="{Binding PositionY}" />
-                       </Style>
-                   </ItemsControl.ItemContainerStyle>
-                   <ItemsControl.ItemTemplate>
+                    <ItemsControl.ItemContainerStyle>
+                        <Style TargetType="ContentPresenter">
+                            <Setter Property="Canvas.Left" Value="{Binding Position.X, Mode=OneWay}" />
+                            <Setter Property="Canvas.Top" Value="{Binding Position.Y, Mode=OneWay}" />
+                        </Style>
+                    </ItemsControl.ItemContainerStyle>
+                    <ItemsControl.ItemTemplate>
                        <DataTemplate>
                            <Ellipse Width="{Binding Diameter}" Height="{Binding Diameter}" Fill="Blue" />
                        </DataTemplate>

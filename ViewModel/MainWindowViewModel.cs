@@ -1,5 +1,5 @@
 ﻿using ConcurrentProgramming.Data;
-using ConcurrentProgramming.Logic;
+using ConcurrentProgramming.Logic.Service;
 using ConcurrentProgramming.Model;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -55,11 +55,11 @@ namespace ConcurrentProgramming.ViewModel
             }
         }
 
-        public List<int> AvailableDiameters { get; } = new List<int> { 10, 20, 30, 50};
+        public List<int> AvailableDiameters { get; } = [10, 20, 30, 50];
 
-        public void UpdateBallsDiameter()
+        private void UpdateBallsDiameter()
         {
-            foreach (var ball in Balls)
+            foreach (IBall ball in Balls)
             {
                 ball.Diameter = SelectedDiameter;
             }
@@ -67,15 +67,17 @@ namespace ConcurrentProgramming.ViewModel
 
         public void StartSimulation()
         {
-            ballService.StopSimulation();
             ballService.CreateBalls(BallCount, SelectedDiameter);
             ballService.StartSimulation();
         }
 
-        public void StopSimulation() => ballService.StopSimulation();
+        public void StopSimulation()
+        {
+            ballService.StopSimulation();
+        }
 
         public event PropertyChangedEventHandler? PropertyChanged;
-        public void OnPropertyChanged(string propertyName)
+        private void OnPropertyChanged(string propertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }

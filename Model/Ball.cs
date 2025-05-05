@@ -4,43 +4,32 @@ namespace ConcurrentProgramming.Model
 {
     public class Ball : IBall, INotifyPropertyChanged
     {
-        private int positionX;
-        private int positionY;
         private int diameter;
-        private VectorTo velocity;
+        private Vector2 velocity;
+        private Vector2 position;
 
-        public Ball(int positionX, int positionY, int diameter)
+        public Ball(int id, Vector2 position, int diameter)
         {
-            this.positionX = positionX;
-            this.positionY = positionY;
+            this.Id = id;
+            this.position = position;
             this.diameter = diameter;
-            velocity = new VectorTo(1, 1);
         }
-        public int PositionX
+
+        public int Id { get; }
+
+        public Vector2 Position
         {
-            get => positionX;
+            get => position;
             set
             {
-                if (positionX != value)
+                if (!position.Equals(value))
                 {
-                    positionX = value;
-                    OnPropertyChanged(nameof(PositionX));
+                    position = value;
+                    OnPropertyChanged(nameof(Position));
                 }
             }
         }
 
-        public int PositionY
-        {
-            get => positionY;
-            set
-            {
-                if (positionY != value)
-                {
-                    positionY = value;
-                    OnPropertyChanged(nameof(PositionY));
-                }
-            }
-        }
         public int Diameter
         {
             get => diameter;
@@ -53,15 +42,22 @@ namespace ConcurrentProgramming.Model
                 }
             }
         }
-        public VectorTo Velocity
+
+        public double Mass => diameter * diameter;
+
+        public Vector2 Velocity
         {
             get => velocity;
             set => velocity = value;
         }
 
+        public void UpdatePosition(Vector2 newPosition)
+        {
+            Position = newPosition;
+        }
 
         public event PropertyChangedEventHandler? PropertyChanged;
-        public void OnPropertyChanged(string propertyName)
+        private void OnPropertyChanged(string propertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }

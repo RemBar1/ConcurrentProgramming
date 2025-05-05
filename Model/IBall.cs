@@ -4,11 +4,10 @@ namespace ConcurrentProgramming.Model
 {
     public interface IBall : INotifyPropertyChanged
     {
-        int PositionX { get; set; }
-        int PositionY { get; set;}
+        Vector2 Position { get; set; }
         int Diameter { get; set; }
-        VectorTo Velocity { get; set; }
-
-        new event PropertyChangedEventHandler PropertyChanged;
+        double Mass { get; }
+        Vector2 Velocity { get; set; }
+        void UpdatePosition(Vector2 newPosition);
     }
 }

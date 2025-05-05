@@ -10,7 +10,7 @@ namespace ConcurrentProgramming.View
         public MainWindow()
         {
             InitializeComponent();
-            BallCountTextBox.Focus();
+            _ = BallCountTextBox.Focus();
             viewModel = new MainWindowViewModel();
             DataContext = viewModel;
         }

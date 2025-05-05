@@ -8,5 +8,6 @@ namespace ConcurrentProgramming.Data
         ObservableCollection<IBall> Balls { get; set; }
         void Add(IBall ball);
         void Clear();
+        IReadOnlyList<IBall> GetAll();
     }
 }
