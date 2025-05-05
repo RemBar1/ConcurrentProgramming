@@ -26,9 +26,7 @@ namespace ConcurrentProgramming.Logic.Service
 
         public void CreateBalls(int count, int diameter)
         {
-            StopSimulation();
             Random random = new();
-            ballRepository.Clear();
 
             for (int i = 0; i < count; i++)
             {

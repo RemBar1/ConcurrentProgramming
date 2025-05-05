@@ -59,14 +59,16 @@ namespace ConcurrentProgramming.ViewModel
 
         private void UpdateBallsDiameter()
         {
-            foreach (IBall ball in Balls)
-            {
-                ball.Diameter = SelectedDiameter;
-            }
+            //foreach (IBall ball in Balls)
+            //{
+            //    ball.Diameter = SelectedDiameter;
+            //}
+            StartSimulation();
         }
 
         public void StartSimulation()
         {
+            ballService.StopSimulation();
             ballService.CreateBalls(BallCount, SelectedDiameter);
             ballService.StartSimulation();
         }
