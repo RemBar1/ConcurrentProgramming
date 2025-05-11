@@ -1,4 +1,5 @@
 ﻿using ConcurrentProgramming.Model;
+using System.Collections.Concurrent;
 
 namespace ConcurrentProgramming.Logic.Collision
 {
@@ -6,16 +7,20 @@ namespace ConcurrentProgramming.Logic.Collision
     {
         public IEnumerable<(IBall, IBall)> DetectCollisions(IReadOnlyList<IBall> balls)
         {
-            for (int i = 0; i < balls.Count; i++)
+            var results = new ConcurrentBag<(IBall, IBall)>();
+
+            Parallel.For(0, balls.Count, i =>
             {
                 for (int j = i + 1; j < balls.Count; j++)
                 {
                     if (IsColliding(balls[i], balls[j]))
                     {
-                        yield return (balls[i], balls[j]);
+                        results.Add((balls[i], balls[j]));
                     }
                 }
-            }
+            });
+
+            return results;
         }
 
         private bool IsColliding(IBall a, IBall b)

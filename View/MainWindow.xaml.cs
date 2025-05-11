@@ -18,6 +18,10 @@ namespace ConcurrentProgramming.View
         protected override void OnClosed(EventArgs e)
         {
             viewModel?.StopSimulation();
+            if (viewModel is IDisposable disposable)
+            {
+                disposable.Dispose();
+            }
             base.OnClosed(e);
         }
     }

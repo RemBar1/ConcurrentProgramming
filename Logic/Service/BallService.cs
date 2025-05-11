@@ -14,6 +14,8 @@ namespace ConcurrentProgramming.Logic.Service
         private readonly int actualBoardHeight;
         private readonly object lockObject = new();
         private CancellationTokenSource cts = new();
+        private Task? simulationTask;
+        private bool disposed;
 
         public BallService(IBallRepository repository, int boardWidth, int boardHeight, int boardThickness)
         {
@@ -27,6 +29,10 @@ namespace ConcurrentProgramming.Logic.Service
         public void CreateBalls(int count, int diameter)
         {
             Random random = new();
+            if (count <= 0) throw new ArgumentOutOfRangeException(nameof(count));
+            if (diameter <= 0) throw new ArgumentOutOfRangeException(nameof(diameter));
+
+            ballRepository.Clear();
 
             for (int i = 0; i < count; i++)
             {
@@ -40,7 +46,7 @@ namespace ConcurrentProgramming.Logic.Service
                         random.Next(diameter, actualBoardWidth - diameter),
                         random.Next(diameter, actualBoardHeight - diameter));
 
-                    foreach (IBall existingBall in ballRepository.Balls)
+                    foreach (IBall existingBall in ballRepository.GetAll())
                     {
                         double distance = (position - existingBall.Position).Length;
                         if (distance < (diameter / 2) + (existingBall.Diameter / 2))
@@ -88,22 +94,30 @@ namespace ConcurrentProgramming.Logic.Service
         }
         public void StartSimulation()
         {
+            if (simulationTask != null && !simulationTask.IsCompleted)
+                return;
+
             cts = new CancellationTokenSource();
-            _ = Task.Run(async () =>
+            simulationTask = Task.Run(async () =>
             {
-                while (!cts.Token.IsCancellationRequested)
+                var timer = new PeriodicTimer(TimeSpan.FromMilliseconds(16));
+                while (!cts.Token.IsCancellationRequested && await timer.WaitForNextTickAsync(cts.Token))
                 {
                     lock (lockObject)
                     {
-                        foreach (IBall? ball in ballRepository.Balls.ToList())
-                        {
-                            UpdateBalls();
-                            HandleCollisions();
-                        }
+                        UpdateBalls();
+                        HandleCollisions();
                     }
-                    await Task.Delay(16, cts.Token);
                 }
             }, cts.Token);
+        }
+
+        public void Dispose()
+        {
+            if (disposed) return;
+            StopSimulation();
+            cts?.Dispose();
+            disposed = true;
         }
 
         public void StopSimulation()

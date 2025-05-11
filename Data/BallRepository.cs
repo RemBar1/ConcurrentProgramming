@@ -5,21 +5,19 @@ namespace ConcurrentProgramming.Data
 {
     public class BallRepository : IBallRepository
     {
-        public ObservableCollection<IBall> Balls { get; set; } = [];
+        private readonly ObservableCollection<IBall> balls = new();
+        public ObservableCollection<IBall> Balls => balls;
 
         public void Add(IBall ball)
         {
-            Balls.Add(ball);
+            if (ball == null) throw new ArgumentNullException(nameof(ball));
+            balls.Add(ball);
         }
 
-        public void Clear()
-        {
-            Balls.Clear();
-        }
+        public void Clear() => balls.Clear();
 
-        public IReadOnlyList<IBall> GetAll()
-        {
-            return Balls.ToList();
-        }
+        public IReadOnlyList<IBall> GetAll() => balls;
+
+        public int Count => balls.Count;
     }
 }

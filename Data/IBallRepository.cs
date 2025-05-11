@@ -5,9 +5,10 @@ namespace ConcurrentProgramming.Data
 {
     public interface IBallRepository
     {
-        ObservableCollection<IBall> Balls { get; set; }
         void Add(IBall ball);
         void Clear();
         IReadOnlyList<IBall> GetAll();
+        int Count { get; }
+        ObservableCollection<IBall> Balls { get; }
     }
 }

@@ -19,9 +19,10 @@ namespace ConcurrentProgramming.ViewModel
         public ICommand StartSimulationCommand { get; }
         public ICommand StopSimulationCommand { get; }
         public ICommand ChangeDiameterCommand { get; }
-        public int BoardWidth { get; set; }
-        public int BoardHeight { get; set; }
-        public int BoardThickness { get; set; } = 3;
+        private bool _isSimulationRunning;
+        public int BoardWidth { get; }
+        public int BoardHeight { get; }
+        public int BoardThickness { get; } = 3;
 
         public int BallCount
         {
@@ -59,10 +60,6 @@ namespace ConcurrentProgramming.ViewModel
 
         private void UpdateBallsDiameter()
         {
-            //foreach (IBall ball in Balls)
-            //{
-            //    ball.Diameter = SelectedDiameter;
-            //}
             StartSimulation();
         }
 
@@ -76,6 +73,20 @@ namespace ConcurrentProgramming.ViewModel
         public void StopSimulation()
         {
             ballService.StopSimulation();
+        }
+
+        public bool IsSimulationRunning
+        {
+            get => _isSimulationRunning;
+            private set
+            {
+                if (_isSimulationRunning != value)
+                {
+                    _isSimulationRunning = value;
+                    OnPropertyChanged(nameof(IsSimulationRunning));
+                    CommandManager.InvalidateRequerySuggested();
+                }
+            }
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;

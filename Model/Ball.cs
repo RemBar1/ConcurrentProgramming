@@ -7,6 +7,7 @@ namespace ConcurrentProgramming.Model
         private int diameter;
         private Vector2 velocity;
         private Vector2 position;
+        private readonly object locked = new();
 
         public Ball(int id, Vector2 position, int diameter)
         {
@@ -19,12 +20,12 @@ namespace ConcurrentProgramming.Model
 
         public Vector2 Position
         {
-            get => position;
+            get { lock (locked) return position; }
             set
             {
                 if (!position.Equals(value))
                 {
-                    position = value;
+                    lock (locked) position = value;
                     OnPropertyChanged(nameof(Position));
                 }
             }
@@ -48,7 +49,14 @@ namespace ConcurrentProgramming.Model
         public Vector2 Velocity
         {
             get => velocity;
-            set => velocity = value;
+            set
+            {
+                if (!velocity.Equals(value))
+                {
+                    velocity = value;
+                    OnPropertyChanged(nameof(Velocity));
+                }
+            }
         }
 
         public void UpdatePosition(Vector2 newPosition)

@@ -1,35 +1,107 @@
-﻿//using ConcurrentProgramming.Data;
-//using ConcurrentProgramming.Model;
+﻿using ConcurrentProgramming.Model;
+using System.Collections.ObjectModel;
 
-//namespace ConcurrentProgramming.DataTest
-//{
-//    [TestClass]
-//    public class BallRepositoryTest
-//    {
-//        [TestMethod]
-//        public void AddAddBallToCollectionTest()
-//        {
-//            var repository = new BallRepository();
-//            var ball = new Ball(0, 0, 20);
+namespace ConcurrentProgramming.Data.Tests
+{
+    [TestClass]
+    public class BallRepositoryTest 
+    {
+        private IBallRepository _repository;
+        private IBall _testBall;
 
-//            repository.Add(ball);
+        [TestInitialize]
+        public void Setup()
+        {
+            _repository = new BallRepository();
+            _testBall = new Ball(1, new Vector2(10, 10), 20);
+        }
 
-//            Assert.AreEqual(1, repository.Balls.Count);
-//            Assert.AreSame(ball, repository.Balls.First());
-//        }
+        [TestMethod]
+        public void AddTest()
+        {
+            // Act
+            _repository.Add(_testBall);
 
-//        [TestMethod]
-//        public void ClearTest()
-//        {
-//            var repository = new BallRepository();
-//            repository.Add(new Ball(0, 0, 20));
-//            repository.Add(new Ball(10, 10, 20));
+            // Assert
+            Assert.AreEqual(1, _repository.Count);
+            Assert.AreSame(_testBall, _repository.GetAll().First());
+        }
 
-//            Assert.AreEqual(2, repository.Balls.Count);
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void AddNullTest()
+        {
+            // Act
+            _repository.Add(null);
+        }
 
-//            repository.Clear();
+        [TestMethod]
+        public void ClearTest()
+        {
+            // Arrange
+            _repository.Add(_testBall);
+            _repository.Add(new Ball(2, new Vector2(20, 20), 20));
 
-//            Assert.AreEqual(0, repository.Balls.Count);
-//        }
-//    }
-//}
+            // Act
+            _repository.Clear();
+
+            // Assert
+            Assert.AreEqual(0, _repository.Count);
+            Assert.AreEqual(0, _repository.GetAll().Count);
+        }
+
+        [TestMethod]
+        public void GetAllTest()
+        {
+            // Arrange
+            _repository.Add(_testBall);
+
+            // Act
+            var result = _repository.GetAll();
+
+            // Assert
+            Assert.IsInstanceOfType(result, typeof(IReadOnlyList<IBall>));
+            Assert.AreEqual(1, result.Count);
+            Assert.AreSame(_testBall, result[0]);
+        }
+
+        [TestMethod]
+        public void CountTest()
+        {
+            // Arrange
+            _repository.Add(_testBall);
+            _repository.Add(new Ball(2, new Vector2(20, 20), 20));
+
+            // Act & Assert
+            Assert.AreEqual(2, _repository.Count);
+
+            // Act
+            _repository.Clear();
+
+            // Assert
+            Assert.AreEqual(0, _repository.Count);
+        }
+
+        [TestMethod]
+        public void BallCollectionTest()
+        {
+            // Act
+            var ballsCollection = _repository.Balls;
+
+            // Assert
+            Assert.IsInstanceOfType(ballsCollection, typeof(ObservableCollection<IBall>));
+        }
+
+        [TestMethod]
+        public void BallsPropertyTest()
+        {
+            // Act
+            _repository.Add(_testBall);
+            var ballsCollection = _repository.Balls;
+
+            // Assert
+            Assert.AreEqual(1, ballsCollection.Count);
+            Assert.AreSame(_testBall, ballsCollection[0]);
+        }
+    }
+}

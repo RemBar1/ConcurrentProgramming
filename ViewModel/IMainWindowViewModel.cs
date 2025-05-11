@@ -10,9 +10,9 @@ namespace ConcurrentProgramming.ViewModel
         ICommand StartSimulationCommand { get; }
         ICommand StopSimulationCommand { get; }
         ICommand ChangeDiameterCommand { get; }
-        int BoardWidth { get; set; }
-        int BoardHeight { get; set; }
-        int BoardThickness { get; set; }
+        int BoardWidth { get; }
+        int BoardHeight { get; }
+        int BoardThickness { get; }
         int BallCount { get; set; }
         int SelectedDiameter { get; set; }
         List<int> AvailableDiameters { get; }
