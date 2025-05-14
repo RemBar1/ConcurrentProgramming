@@ -1,117 +1,118 @@
-﻿//using ConcurrentProgramming.Data;
-//using ConcurrentProgramming.Logic.Service;
-//using ConcurrentProgramming.Model;
+﻿using ConcurrentProgramming.Data;
+using ConcurrentProgramming.Logic.Service;
+using ConcurrentProgramming.Model;
 
-//namespace ConcurrentProgramming.LogicTest
-//{
-//    [TestClass]
-//    public class BallServiceTest
-//    {
-//        private BallRepository repository;
-//        private BallService service;
+namespace ConcurrentProgramming.LogicTest
+{
+    [TestClass]
+    public class BallServiceIntegrationTests
+    {
+        private BallRepository _repository;
+        private BallService _ballService;
+        private const int TestBoardSize = 500;
+        private const int TestBoardThickness = 5;
 
-//        [TestInitialize]
-//        public void Initialize()
-//        {
-//            repository = new BallRepository();
-//            service = new BallService(repository, 700, 500, 0);
-//        }
+        [TestInitialize]
+        public void Setup()
+        {
+            _repository = new BallRepository();
+            _ballService = new BallService(
+                _repository,
+                TestBoardSize,
+                TestBoardSize,
+                TestBoardThickness);
+        }
 
-//        [TestMethod]
-//        public void CreateBallsTest()
-//        {
-//            service.CreateBalls(5, 20);
+        [TestMethod]
+        public void CreateBallsTest()
+        {
+            // Act
+            _ballService.CreateBalls(5, 20);
 
-//            Assert.AreEqual(5, repository.Balls.Count);
-//        }
+            // Assert
+            Assert.AreEqual(5, _repository.Count);
+        }
 
-//        [TestMethod]
-//        public void CreateBallsCorrectPositionsTest()
-//        {
-//            service.CreateBalls(10, 20);
+        [TestMethod]
+        public void CreateBallsNoCollisionsTest()
+        {
+            // Act
+            _ballService.CreateBalls(10, 20);
 
-//            for (int i = 0; i < repository.Balls.Count; i++)
-//            {
-//                for (int j = i + 1; j < repository.Balls.Count; j++)
-//                {
-//                    var ball1 = repository.Balls[i];
-//                    var ball2 = repository.Balls[j];
-//                    Assert.IsFalse(
-//                        Math.Abs(ball1.PositionX - ball2.PositionX) < 20 &&
-//                        Math.Abs(ball1.PositionY - ball2.PositionY) < 20
-//                    );
-//                }
-//            }
-//        }
+            // Assert
+            var balls = _repository.GetAll().ToList();
+            for (int i = 0; i < balls.Count; i++)
+            {
+                for (int j = i + 1; j < balls.Count; j++)
+                {
+                    double distance = (balls[i].Position - balls[j].Position).Length;
+                    double minDistance = balls[i].Diameter / 2 + balls[j].Diameter / 2;
+                    Assert.IsTrue(distance >= minDistance,
+                        $"Balls {i} and {j} are too close to each other");
+                }
+            }
+        }
 
-//        [TestMethod]
-//        public void StartStopSimulationTest()
-//        {
-//            var ball = new Ball(100, 100, 20);
-//            repository.Add(ball);
+        [TestMethod]
+        public void StartSimulationTest()
+        {
+            // Arrange
+            _ballService.CreateBalls(1, 20);
 
-//            service.StartSimulation();
-//            Thread.Sleep(100);
-//            service.StopSimulation();
+            // Act
+            _ballService.StartSimulation();
 
-//            Assert.AreNotEqual(100, ball.PositionX);
-//            Assert.AreNotEqual(100, ball.PositionY);
-//        }
+            // Assert
+            Assert.IsTrue(_ballService.IsSimulationRunning);
+            _ballService.StopSimulation();
+        }
 
+        [TestMethod]
+        public void StopSimulationTest()
+        {
+            // Arrange
+            _ballService.CreateBalls(1, 20);
+            _ballService.StartSimulation();
 
-//        [TestMethod]
-//        public void MoveBallTest()
-//        {
-//            var ball = new Ball(100, 100, 20) { Velocity = new Vector2(5, 10) };
-//            repository.Add(ball);
+            // Act
+            _ballService.StopSimulation();
+            Thread.Sleep(100); // Czekamy na zatrzymanie
 
-//            service.MoveBall(ball);
+            // Assert
+            Assert.IsFalse(_ballService.IsSimulationRunning);
+        }
 
-//            Assert.AreEqual(105, ball.PositionX);
-//            Assert.AreEqual(110, ball.PositionY);
-//        }
-//        [TestMethod]
-//        public void MoveBallShouldBounceFromLeftWallTest()
-//        {
-//            var ball = new Ball(0, 100, 20) { Velocity = new Vector2(-5, 2), Diameter = 20 };
+        [TestMethod]
+        public void SimulationPositionsTest()
+        {
+            // Arrange
+            _ballService.CreateBalls(1, 20);
+            var ball = _repository.GetAll().First();
+            var initialPosition = ball.Position;
 
-//            service.MoveBall(ball);
+            // Act
+            _ballService.StartSimulation();
+            Thread.Sleep(100); // Czekamy na aktualizację
 
-//            Assert.AreEqual(5, ball.Velocity.X);
-//            Assert.AreEqual(0, ball.PositionX);
-//        }
+            // Assert
+            Assert.AreNotEqual(initialPosition, ball.Position);
 
-//        [TestMethod]
-//        public void MoveBallShouldBounceFromRightWallTest()
-//        {
-//            var ball = new Ball(680, 100, 20) { Velocity = new Vector2(5, 2), Diameter = 20 };
+            _ballService.StopSimulation();
+        }
 
-//            service.MoveBall(ball);
+        [TestMethod]
+        public void DisposeTest()
+        {
+            // Arrange
+            _ballService.CreateBalls(1, 20);
+            _ballService.StartSimulation();
 
-//            Assert.AreEqual(-5, ball.Velocity.X);
-//            Assert.AreEqual(680, ball.PositionX);
-//        }
+            // Act
+            _ballService.Dispose();
 
-//        [TestMethod]
-//        public void MoveBallShouldBounceFromTopWallTest()
-//        {
-//            var ball = new Ball(100, 0, 20) { Velocity = new Vector2(2, -5), Diameter = 20 };
-
-//            service.MoveBall(ball);
-
-//            Assert.AreEqual(5, ball.Velocity.Y);
-//            Assert.AreEqual(0, ball.PositionY);
-//        }
-
-//        [TestMethod]
-//        public void MoveBallShouldBounceFromBottomWallTest()
-//        {
-//            var ball = new Ball(100, 480, 20) { Velocity = new Vector2(2, 5), Diameter = 20 };
-
-//            service.MoveBall(ball);
-
-//            Assert.AreEqual(-5, ball.Velocity.Y);
-//            Assert.AreEqual(480, ball.PositionY);
-//        }
-//    }
-//}
+            // Assert
+            Assert.IsFalse(_ballService.IsSimulationRunning);
+            Assert.AreEqual(0, _repository.Count);
+        }
+    }
+}

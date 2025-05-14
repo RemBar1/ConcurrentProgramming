@@ -26,6 +26,8 @@ namespace ConcurrentProgramming.Logic.Service
             collisionDetector = new CollisionDetector();
         }
 
+        public bool IsSimulationRunning => simulationTask != null && !simulationTask.IsCompleted;
+
         public void CreateBalls(int count, int diameter)
         {
             Random random = new();

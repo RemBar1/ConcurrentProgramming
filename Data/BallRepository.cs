@@ -10,7 +10,7 @@ namespace ConcurrentProgramming.Data
 
         public void Add(IBall ball)
         {
-            if (ball == null) throw new ArgumentNullException(nameof(ball));
+            ArgumentNullException.ThrowIfNull(ball);
             balls.Add(ball);
         }
 
