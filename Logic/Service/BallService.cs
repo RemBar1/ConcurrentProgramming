@@ -2,6 +2,7 @@
 using ConcurrentProgramming.Logic.Collision;
 using ConcurrentProgramming.Logic.Physics;
 using ConcurrentProgramming.Model;
+using System.Diagnostics;
 
 namespace ConcurrentProgramming.Logic.Service
 {
@@ -16,6 +17,8 @@ namespace ConcurrentProgramming.Logic.Service
         private CancellationTokenSource cts = new();
         private Task? simulationTask;
         private bool disposed;
+        private readonly Stopwatch frameStopwatch = new();
+        private const double TargetFrameTime = 16.0;
 
         public BallService(IBallRepository repository, int boardWidth, int boardHeight, int boardThickness)
         {
@@ -31,8 +34,8 @@ namespace ConcurrentProgramming.Logic.Service
         public void CreateBalls(int count, int diameter)
         {
             Random random = new();
-            if (count <= 0) throw new ArgumentOutOfRangeException(nameof(count));
-            if (diameter <= 0) throw new ArgumentOutOfRangeException(nameof(diameter));
+            //if (count <= 0) throw new ArgumentOutOfRangeException(nameof(count));
+            //if (diameter <= 0) throw new ArgumentOutOfRangeException(nameof(diameter));
 
             ballRepository.Clear();
 
@@ -71,11 +74,11 @@ namespace ConcurrentProgramming.Logic.Service
             }
         }
 
-        private void UpdateBalls()
+        private void UpdateBalls(double deltaTime)
         {
             foreach (IBall ball in ballRepository.GetAll())
             {
-                Vector2 newPos = ball.Position + (ball.Velocity * 0.016);
+                Vector2 newPos = ball.Position + (ball.Velocity * deltaTime);
                 ball.UpdatePosition(newPos);
             }
         }
@@ -102,13 +105,27 @@ namespace ConcurrentProgramming.Logic.Service
             cts = new CancellationTokenSource();
             simulationTask = Task.Run(async () =>
             {
-                var timer = new PeriodicTimer(TimeSpan.FromMilliseconds(16));
-                while (!cts.Token.IsCancellationRequested && await timer.WaitForNextTickAsync(cts.Token))
+                frameStopwatch.Start();
+                double lastTime = frameStopwatch.ElapsedMilliseconds;
+
+                while (!cts.Token.IsCancellationRequested)
                 {
-                    lock (lockObject)
+                    double currentTime = frameStopwatch.ElapsedMilliseconds;
+                    double deltaTime = currentTime - lastTime;
+
+                    if (deltaTime >= TargetFrameTime)
                     {
-                        UpdateBalls();
-                        HandleCollisions();
+                        lock (lockObject)
+                        {
+                            UpdateBalls(deltaTime / 100.0); 
+                            HandleCollisions();
+                        }
+                        lastTime = currentTime;
+                    }
+                    else
+                    {
+                        int sleepTime = (int)(TargetFrameTime - deltaTime);
+                        await Task.Delay(Math.Max(1, sleepTime), cts.Token);
                     }
                 }
             }, cts.Token);
