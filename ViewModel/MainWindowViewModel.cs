@@ -27,7 +27,7 @@ namespace ConcurrentProgramming.ViewModel
         public int BallCount
         {
             get => ballCount;
-            set => ballCount = Math.Clamp(value, 1, 50);
+            set => ballCount = Math.Clamp(value, 1, 20);
         }
 
         public MainWindowViewModel()
@@ -56,7 +56,7 @@ namespace ConcurrentProgramming.ViewModel
             }
         }
 
-        public List<int> AvailableDiameters { get; } = [10, 20, 30, 50];
+        public List<int> AvailableDiameters { get; } = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
 
         private void UpdateBallsDiameter()
         {

@@ -8,6 +8,8 @@ namespace ConcurrentProgramming.Model
         int Diameter { get; set; }
         double Mass { get; }
         Vector2 Velocity { get; set; }
+        int Id { get; }
+
         void UpdatePosition(Vector2 newPosition);
     }
 }

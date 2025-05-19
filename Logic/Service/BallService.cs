@@ -17,8 +17,10 @@ namespace ConcurrentProgramming.Logic.Service
         private CancellationTokenSource cts = new();
         private Task? simulationTask;
         private bool disposed;
-        private readonly Stopwatch frameStopwatch = new();
         private const double TargetFrameTime = 16.0;
+        private const double FixedTimeStep = 1.0 / 60.0;
+        private readonly List<Thread> simulationThreads = [];
+
 
         public BallService(IBallRepository repository, int boardWidth, int boardHeight, int boardThickness)
         {
@@ -34,8 +36,6 @@ namespace ConcurrentProgramming.Logic.Service
         public void CreateBalls(int count, int diameter)
         {
             Random random = new();
-            //if (count <= 0) throw new ArgumentOutOfRangeException(nameof(count));
-            //if (diameter <= 0) throw new ArgumentOutOfRangeException(nameof(diameter));
 
             ballRepository.Clear();
 
@@ -68,18 +68,9 @@ namespace ConcurrentProgramming.Logic.Service
                     diameter: diameter
                 )
                 {
-                    Velocity = new Vector2((random.NextDouble() * 4) - 2, (random.NextDouble() * 4) - 2)
+                    Velocity = new Vector2((random.NextDouble() * 100) - 50, (random.NextDouble() * 100) - 50)
                 };
                 ballRepository.Add(ball);
-            }
-        }
-
-        private void UpdateBalls(double deltaTime)
-        {
-            foreach (IBall ball in ballRepository.GetAll())
-            {
-                Vector2 newPos = ball.Position + (ball.Velocity * deltaTime);
-                ball.UpdatePosition(newPos);
             }
         }
 
@@ -97,39 +88,6 @@ namespace ConcurrentProgramming.Logic.Service
                 ballPhysics.HandleBallCollision(a, b);
             }
         }
-        public void StartSimulation()
-        {
-            if (simulationTask != null && !simulationTask.IsCompleted)
-                return;
-
-            cts = new CancellationTokenSource();
-            simulationTask = Task.Run(async () =>
-            {
-                frameStopwatch.Start();
-                double lastTime = frameStopwatch.ElapsedMilliseconds;
-
-                while (!cts.Token.IsCancellationRequested)
-                {
-                    double currentTime = frameStopwatch.ElapsedMilliseconds;
-                    double deltaTime = currentTime - lastTime;
-
-                    if (deltaTime >= TargetFrameTime)
-                    {
-                        lock (lockObject)
-                        {
-                            UpdateBalls(deltaTime / 100.0); 
-                            HandleCollisions();
-                        }
-                        lastTime = currentTime;
-                    }
-                    else
-                    {
-                        int sleepTime = (int)(TargetFrameTime - deltaTime);
-                        await Task.Delay(Math.Max(1, sleepTime), cts.Token);
-                    }
-                }
-            }, cts.Token);
-        }
 
         public void Dispose()
         {
@@ -139,12 +97,65 @@ namespace ConcurrentProgramming.Logic.Service
             disposed = true;
         }
 
+        public void StartSimulation()
+        {
+            if (simulationThreads.Any(t => t.IsAlive))
+                return;
+
+            cts = new CancellationTokenSource();
+            simulationThreads.Clear();
+
+            foreach (var ball in ballRepository.GetAll())
+            {
+                Thread ballThread = new Thread(() =>
+                {
+                    var stopwatch = Stopwatch.StartNew();
+                    double previousTime = stopwatch.ElapsedMilliseconds;
+                    double accumulatedTime = 0;
+
+                    while (!cts.Token.IsCancellationRequested)
+                    {
+                        double currentTime = stopwatch.ElapsedMilliseconds;
+                        double deltaTime = currentTime - previousTime;
+                        previousTime = currentTime;
+
+                        accumulatedTime += deltaTime;
+
+                        if (accumulatedTime >= TargetFrameTime)
+                        {
+                            lock (lockObject)
+                            {
+                                Vector2 newPos = ball.Position + (ball.Velocity * FixedTimeStep);
+                                ball.UpdatePosition(newPos);
+
+                                HandleCollisions();
+                            }
+                            accumulatedTime -= TargetFrameTime;
+                        }
+
+                        int sleepTime = (int)(TargetFrameTime - accumulatedTime);
+                        if (sleepTime > 0) Thread.Sleep(sleepTime);
+                    }
+                });
+
+                ballThread.IsBackground = true;
+                simulationThreads.Add(ballThread);
+                ballThread.Start();
+            }
+        }
+
         public void StopSimulation()
         {
             if (cts != null)
             {
-                ballRepository.Clear();
                 cts.Cancel();
+                foreach (var thread in simulationThreads)
+                {
+                    if (thread.IsAlive)
+                        thread.Join();
+                }
+                ballRepository.Clear();
+                simulationThreads.Clear();
             }
         }
     }

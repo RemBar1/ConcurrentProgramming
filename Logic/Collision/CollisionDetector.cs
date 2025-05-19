@@ -23,7 +23,7 @@ namespace ConcurrentProgramming.Logic.Collision
             return results;
         }
 
-        private bool IsColliding(IBall a, IBall b)
+        private static bool IsColliding(IBall a, IBall b)
         {
             double distance = (a.Position - b.Position).Length;
             return distance <= ((a.Diameter / 2) + (b.Diameter / 2));

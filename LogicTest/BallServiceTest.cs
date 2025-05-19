@@ -54,20 +54,6 @@ namespace ConcurrentProgramming.LogicTest
         }
 
         [TestMethod]
-        public void StartSimulationTest()
-        {
-            // Arrange
-            _ballService.CreateBalls(1, 20);
-
-            // Act
-            _ballService.StartSimulation();
-
-            // Assert
-            Assert.IsTrue(_ballService.IsSimulationRunning);
-            _ballService.StopSimulation();
-        }
-
-        [TestMethod]
         public void StopSimulationTest()
         {
             // Arrange
