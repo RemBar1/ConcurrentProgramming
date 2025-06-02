@@ -15,7 +15,7 @@ namespace ConcurrentProgramming.Logic.Service
         private readonly int actualBoardHeight;
         private readonly object lockObject = new();
         private CancellationTokenSource cts = new();
-        private Task? simulationTask;
+        private readonly Task? simulationTask;
         private bool disposed;
         private const double TargetFrameTime = 16.0;
         private const double FixedTimeStep = 1.0 / 60.0;
@@ -91,7 +91,11 @@ namespace ConcurrentProgramming.Logic.Service
 
         public void Dispose()
         {
-            if (disposed) return;
+            if (disposed)
+            {
+                return;
+            }
+
             StopSimulation();
             cts?.Dispose();
             disposed = true;
@@ -100,16 +104,18 @@ namespace ConcurrentProgramming.Logic.Service
         public void StartSimulation()
         {
             if (simulationThreads.Any(t => t.IsAlive))
+            {
                 return;
+            }
 
             cts = new CancellationTokenSource();
             simulationThreads.Clear();
 
-            foreach (var ball in ballRepository.GetAll())
+            foreach (IBall ball in ballRepository.GetAll())
             {
-                Thread ballThread = new Thread(() =>
+                Thread ballThread = new(() =>
                 {
-                    var stopwatch = Stopwatch.StartNew();
+                    Stopwatch stopwatch = Stopwatch.StartNew();
                     double previousTime = stopwatch.ElapsedMilliseconds;
                     double accumulatedTime = 0;
 
@@ -134,11 +140,15 @@ namespace ConcurrentProgramming.Logic.Service
                         }
 
                         int sleepTime = (int)(TargetFrameTime - accumulatedTime);
-                        if (sleepTime > 0) Thread.Sleep(sleepTime);
+                        if (sleepTime > 0)
+                        {
+                            Thread.Sleep(sleepTime);
+                        }
                     }
-                });
-
-                ballThread.IsBackground = true;
+                })
+                {
+                    IsBackground = true
+                };
                 simulationThreads.Add(ballThread);
                 ballThread.Start();
             }
@@ -149,10 +159,12 @@ namespace ConcurrentProgramming.Logic.Service
             if (cts != null)
             {
                 cts.Cancel();
-                foreach (var thread in simulationThreads)
+                foreach (Thread thread in simulationThreads)
                 {
                     if (thread.IsAlive)
+                    {
                         thread.Join();
+                    }
                 }
                 ballRepository.Clear();
                 simulationThreads.Clear();
