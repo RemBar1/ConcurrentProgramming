@@ -188,11 +188,15 @@ namespace ConcurrentProgramming.Logic.Service
         {
             try
             {
-                string logEntry = $" ID:{ball.Id} | {DateTime.UtcNow:o} | Pos:X:{ball.Position.X:0.00},Y:{ball.Position.Y:0.00} | Vel:X:{ball.Velocity.X:0.00},Y:{ball.Velocity.Y:0.00} | Collision:{collisionType}{Environment.NewLine}";
-
+                string logEntry =
+                 $"ID:{ball.Id.ToString().PadLeft(4)} | " +
+                 $"{DateTime.Now:yyyy-MM-ddTHH:mm:ss.fff} | " +
+                 $"Pos:X:{ball.Position.X.ToString("0.00").PadLeft(6)},Y:{ball.Position.Y.ToString("0.00").PadLeft(6)} | " +
+                 $"Vel:X:{ball.Velocity.X.ToString("0.00").PadLeft(6)},Y:{ball.Velocity.Y.ToString("0.00").PadLeft(6)} | " +
+                 $"Type:{collisionType.PadRight(10)}{Environment.NewLine}";
                 lock (lockObject)
                 {
-                    logBuffer.Append(logEntry);
+                    _ = logBuffer.Append(logEntry);
 
                     if (logBuffer.Length >= MaxBufferSize)
                     {
@@ -215,7 +219,7 @@ namespace ConcurrentProgramming.Logic.Service
                     if (logBuffer.Length > 0)
                     {
                         logger.Log(logBuffer.ToString());
-                        logBuffer.Clear();
+                        _ = logBuffer.Clear();
                     }
                 }
             }
