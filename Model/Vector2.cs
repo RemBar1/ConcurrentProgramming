@@ -39,5 +39,10 @@
 
         public static bool operator ==(Vector2 left, Vector2 right) => left.Equals(right);
         public static bool operator !=(Vector2 left, Vector2 right) => !left.Equals(right);
+
+        public override string ToString()
+        {
+            return $"X:{X:0.00},Y:{Y:0.00}";
+        }
     }
 }

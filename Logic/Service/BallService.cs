@@ -3,6 +3,7 @@ using ConcurrentProgramming.Logic.Collision;
 using ConcurrentProgramming.Logic.Physics;
 using ConcurrentProgramming.Model;
 using System.Diagnostics;
+using System.Text;
 
 namespace ConcurrentProgramming.Logic.Service
 {
@@ -20,7 +21,10 @@ namespace ConcurrentProgramming.Logic.Service
         private const double TargetFrameTime = 16.0;
         private const double FixedTimeStep = 1.0 / 60.0;
         private readonly List<Thread> simulationThreads = [];
-
+        private readonly ILogger logger;
+        private readonly string logFilePath = "ball_diagnostics.log";
+        private readonly StringBuilder logBuffer = new();
+        private const int MaxBufferSize = 4096; // 4KB
 
         public BallService(IBallRepository repository, int boardWidth, int boardHeight, int boardThickness)
         {
@@ -29,6 +33,9 @@ namespace ConcurrentProgramming.Logic.Service
             actualBoardHeight = boardHeight - (boardThickness * 2);
             ballPhysics = new PhysicsEngine();
             collisionDetector = new CollisionDetector();
+            ClearLogFile();
+            logger = new FileLogger(logFilePath);
+
         }
 
         public bool IsSimulationRunning => simulationTask != null && !simulationTask.IsCompleted;
@@ -80,12 +87,19 @@ namespace ConcurrentProgramming.Logic.Service
 
             foreach (IBall ball in balls)
             {
-                ballPhysics.HandleWallCollision(ball, actualBoardWidth, actualBoardHeight);
+                if (ballPhysics.HandleWallCollision(ball, actualBoardWidth, actualBoardHeight))
+                {
+                    LogBallData(ball, "WALL_COLLISION");
+                }
             }
 
             foreach ((IBall a, IBall b) in collisionDetector.DetectCollisions(balls))
             {
-                ballPhysics.HandleBallCollision(a, b);
+                if (ballPhysics.HandleBallCollision(a, b))
+                {
+                    LogBallData(a, $"BALL_COLLISION_WITH:{b.Id}");
+                    LogBallData(b, $"BALL_COLLISION_WITH:{a.Id}");
+                }
             }
         }
 
@@ -97,6 +111,7 @@ namespace ConcurrentProgramming.Logic.Service
             }
 
             StopSimulation();
+            FlushLogBuffer();
             cts?.Dispose();
             disposed = true;
         }
@@ -133,7 +148,6 @@ namespace ConcurrentProgramming.Logic.Service
                             {
                                 Vector2 newPos = ball.Position + (ball.Velocity * FixedTimeStep);
                                 ball.UpdatePosition(newPos);
-
                                 HandleCollisions();
                             }
                             accumulatedTime -= TargetFrameTime;
@@ -168,6 +182,58 @@ namespace ConcurrentProgramming.Logic.Service
                 }
                 ballRepository.Clear();
                 simulationThreads.Clear();
+            }
+        }
+        private void LogBallData(IBall ball, string collisionType)
+        {
+            try
+            {
+                string logEntry = $" ID:{ball.Id} | {DateTime.UtcNow:o} | Pos:X:{ball.Position.X:0.00},Y:{ball.Position.Y:0.00} | Vel:X:{ball.Velocity.X:0.00},Y:{ball.Velocity.Y:0.00} | Collision:{collisionType}{Environment.NewLine}";
+
+                lock (lockObject)
+                {
+                    logBuffer.Append(logEntry);
+
+                    if (logBuffer.Length >= MaxBufferSize)
+                    {
+                        FlushLogBuffer();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Błąd logowania: {ex.Message}");
+            }
+        }
+
+        private void FlushLogBuffer()
+        {
+            try
+            {
+                lock (lockObject)
+                {
+                    if (logBuffer.Length > 0)
+                    {
+                        logger.Log(logBuffer.ToString());
+                        logBuffer.Clear();
+                    }
+                }
+            }
+            catch (IOException ex)
+            {
+                Debug.WriteLine($"Błąd zapisu bufora logów: {ex.Message}");
+            }
+        }
+
+        private void ClearLogFile()
+        {
+            try
+            {
+                File.WriteAllText(logFilePath, string.Empty);
+            }
+            catch (IOException ex)
+            {
+                Debug.WriteLine($"Nie udało się wyczyścić pliku loga: {ex.Message}");
             }
         }
     }
