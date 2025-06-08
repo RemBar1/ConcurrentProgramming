@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.Drawing;
 
 namespace ConcurrentProgramming.Model
 {
@@ -9,6 +10,7 @@ namespace ConcurrentProgramming.Model
         double Mass { get; }
         Vector2 Velocity { get; set; }
         int Id { get; }
+        Color Color { get; set; }
 
         void UpdatePosition(Vector2 newPosition);
     }

@@ -3,11 +3,16 @@
        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-       xmlns:model="clr-namespace:ConcurrentProgramming.Model;assembly=ConcurrentProgramming.Model" 
+       xmlns:model="clr-namespace:ConcurrentProgramming.Model;assembly=ConcurrentProgramming.Model"
+       xmlns:converters="clr-namespace:ConcurrentProgramming.View.Converters"
        d:DataContext="{d:DesignInstance Type=model:Ball}"
        mc:Ignorable="d"
        Title="Symulacja Kul"
        WindowState="Maximized">
+
+    <Window.Resources>
+        <converters:ColorToBrushConverter x:Key="ColorToBrushConverter"/>
+    </Window.Resources>
 
     <Grid>
         <TextBlock x:Name="ClockTextBlock" 
@@ -54,8 +59,8 @@
                     </ItemsControl.ItemContainerStyle>
                     <ItemsControl.ItemTemplate>
                        <DataTemplate>
-                           <Ellipse Width="{Binding Diameter}" Height="{Binding Diameter}" Fill="Blue" />
-                       </DataTemplate>
+                           <Ellipse Width="{Binding Diameter}" Height="{Binding Diameter}" Fill="{Binding Color, Converter={StaticResource ColorToBrushConverter}}" />
+                        </DataTemplate>
                    </ItemsControl.ItemTemplate>
                </ItemsControl>
            </Border>

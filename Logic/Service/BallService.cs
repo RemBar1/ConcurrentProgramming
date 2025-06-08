@@ -3,6 +3,7 @@ using ConcurrentProgramming.Logic.Collision;
 using ConcurrentProgramming.Logic.Physics;
 using ConcurrentProgramming.Model;
 using System.Diagnostics;
+using System.Drawing;
 
 namespace ConcurrentProgramming.Logic.Service
 {
@@ -19,6 +20,18 @@ namespace ConcurrentProgramming.Logic.Service
         private bool disposed;
         private const double TargetFrameTime = 16.0;
         private const double FixedTimeStep = 1.0 / 60.0;
+        private readonly System.Timers.Timer colorChangeTimer;
+        private readonly Random random = new();
+        private readonly Color[] availableColors = new[]
+        {
+            Color.Red,
+            Color.Blue,
+            Color.Green,
+            Color.Yellow,
+            Color.Purple,
+            Color.Orange,
+            Color.Pink,
+        };
 
         private const string LogsDirectory = "logs";
         private readonly string creationLogPath = Path.Combine(LogsDirectory, "ball_creation.log");
@@ -48,6 +61,22 @@ namespace ConcurrentProgramming.Logic.Service
             ballCollisionLogger = new FileLogger(ballCollisionLogPath);
             wallCollisionLogger = new FileLogger(wallCollisionLogPath);
             movementLogger = new FileLogger(movementLogPath);
+
+            // Initialize color change timer
+            colorChangeTimer = new System.Timers.Timer(1000); // Change color every second
+            colorChangeTimer.Elapsed += ColorChangeTimer_Elapsed;
+            colorChangeTimer.AutoReset = true;
+        }
+
+        private void ColorChangeTimer_Elapsed(object? sender, System.Timers.ElapsedEventArgs e)
+        {
+            lock (lockObject)
+            {
+                foreach (IBall ball in ballRepository.GetAll())
+                {
+                    ball.Color = availableColors[random.Next(availableColors.Length)];
+                }
+            }
         }
 
         private void InitializeLogFiles()
@@ -104,7 +133,8 @@ namespace ConcurrentProgramming.Logic.Service
                         position: position,
                         diameter: diameter)
                     {
-                        Velocity = new Vector2((random.NextDouble() * 100) - 50, (random.NextDouble() * 100) - 50)
+                        Velocity = new Vector2((random.NextDouble() * 100) - 50, (random.NextDouble() * 100) - 50),
+                        Color = availableColors[random.Next(availableColors.Length)]
                     };
                     ballRepository.Add(ball);
 
@@ -119,9 +149,10 @@ namespace ConcurrentProgramming.Logic.Service
 
         public void StartSimulation()
         {
-
             cts = new CancellationTokenSource();
             simulationThreads.Clear();
+
+            colorChangeTimer.Start();
 
             foreach (IBall ball in ballRepository.GetAll())
             {
@@ -168,6 +199,7 @@ namespace ConcurrentProgramming.Logic.Service
 
         public void StopSimulation()
         {
+            colorChangeTimer.Stop();
             cts?.Cancel();
 
             foreach (Thread thread in simulationThreads)
@@ -241,6 +273,7 @@ namespace ConcurrentProgramming.Logic.Service
 
             movementLogTimer?.Dispose();
             collisionLogTimer?.Dispose();
+            colorChangeTimer?.Dispose();
             cts?.Dispose();
 
             disposed = true;

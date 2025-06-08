@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.Drawing;
 
 namespace ConcurrentProgramming.Model
 {
@@ -7,6 +8,7 @@ namespace ConcurrentProgramming.Model
         private int diameter;
         private Vector2 velocity;
         private Vector2 position;
+        private Color color;
         private readonly object locked = new();
 
         public Ball(int id, Vector2 position, int diameter)
@@ -14,6 +16,7 @@ namespace ConcurrentProgramming.Model
             this.Id = id;
             this.position = position;
             this.diameter = diameter;
+            this.color = Color.Blue; // Default color
         }
 
         public int Id { get; }
@@ -55,6 +58,19 @@ namespace ConcurrentProgramming.Model
                 {
                     velocity = value;
                     OnPropertyChanged(nameof(Velocity));
+                }
+            }
+        }
+
+        public Color Color
+        {
+            get => color;
+            set
+            {
+                if (color != value)
+                {
+                    color = value;
+                    OnPropertyChanged(nameof(Color));
                 }
             }
         }
