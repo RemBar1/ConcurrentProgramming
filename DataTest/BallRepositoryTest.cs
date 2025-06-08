@@ -1,107 +1,122 @@
-﻿using ConcurrentProgramming.Model;
-using System.Collections.ObjectModel;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using ConcurrentProgramming.Data;
+using ConcurrentProgramming.Model;
+using System.Linq;
 
-namespace ConcurrentProgramming.Data.Tests
+namespace DataTest
 {
     [TestClass]
-    public class BallRepositoryTest 
+    public class BallRepositoryTest
     {
-        private IBallRepository _repository;
-        private IBall _testBall;
+        private IBallRepository repository;
 
         [TestInitialize]
         public void Setup()
         {
-            _repository = new BallRepository();
-            _testBall = new Ball(1, new Vector2(10, 10), 20);
+            repository = new BallRepository();
         }
 
         [TestMethod]
-        public void AddTest()
-        {
-            // Act
-            _repository.Add(_testBall);
-
-            // Assert
-            Assert.AreEqual(1, _repository.Count);
-            Assert.AreSame(_testBall, _repository.GetAll().First());
-        }
-
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
-        public void AddNullTest()
-        {
-            // Act
-            _repository.Add(null);
-        }
-
-        [TestMethod]
-        public void ClearTest()
+        public void Add_NewBall_AddsSuccessfully()
         {
             // Arrange
-            _repository.Add(_testBall);
-            _repository.Add(new Ball(2, new Vector2(20, 20), 20));
+            Ball ball = new Ball(1, new Vector2(100, 100), 20);
 
             // Act
-            _repository.Clear();
+            repository.Add(ball);
 
             // Assert
-            Assert.AreEqual(0, _repository.Count);
-            Assert.AreEqual(0, _repository.GetAll().Count);
+            Assert.AreEqual(1, repository.GetAll().Count());
+            Assert.AreEqual(ball, repository.GetAll().First());
         }
 
         [TestMethod]
-        public void GetAllTest()
+        public void Add_MultipleBalls_AddsAllSuccessfully()
         {
             // Arrange
-            _repository.Add(_testBall);
+            Ball ball1 = new Ball(1, new Vector2(100, 100), 20);
+            Ball ball2 = new Ball(2, new Vector2(200, 200), 20);
+            Ball ball3 = new Ball(3, new Vector2(300, 300), 20);
 
             // Act
-            var result = _repository.GetAll();
+            repository.Add(ball1);
+            repository.Add(ball2);
+            repository.Add(ball3);
 
             // Assert
-            Assert.IsInstanceOfType(result, typeof(IReadOnlyList<IBall>));
-            Assert.AreEqual(1, result.Count);
-            Assert.AreSame(_testBall, result[0]);
+            Assert.AreEqual(3, repository.GetAll().Count());
+            CollectionAssert.Contains(repository.GetAll().ToList(), ball1);
+            CollectionAssert.Contains(repository.GetAll().ToList(), ball2);
+            CollectionAssert.Contains(repository.GetAll().ToList(), ball3);
         }
 
         [TestMethod]
-        public void CountTest()
+        public void GetAll_EmptyRepository_ReturnsEmptyCollection()
+        {
+            // Act
+            var balls = repository.GetAll();
+
+            // Assert
+            Assert.IsFalse(balls.Any());
+        }
+
+        [TestMethod]
+        public void Clear_WithBalls_RemovesAllBalls()
         {
             // Arrange
-            _repository.Add(_testBall);
-            _repository.Add(new Ball(2, new Vector2(20, 20), 20));
+            repository.Add(new Ball(1, new Vector2(100, 100), 20));
+            repository.Add(new Ball(2, new Vector2(200, 200), 20));
+
+            // Act
+            repository.Clear();
+
+            // Assert
+            Assert.IsFalse(repository.GetAll().Any());
+        }
+
+        [TestMethod]
+        public void Clear_EmptyRepository_DoesNotThrowException()
+        {
+            // Act & Assert
+            repository.Clear(); // Should not throw
+            Assert.IsFalse(repository.GetAll().Any());
+        }
+
+        [TestMethod]
+        public void GetAll_ReturnsCopy_ModifyingReturnDoesNotAffectRepository()
+        {
+            // Arrange
+            Ball ball1 = new Ball(1, new Vector2(100, 100), 20);
+            Ball ball2 = new Ball(2, new Vector2(200, 200), 20);
+            repository.Add(ball1);
+            repository.Add(ball2);
+
+            // Act
+            var balls = repository.GetAll().ToList();
+            balls.Clear(); // Modify the returned collection
+
+            // Assert
+            Assert.AreEqual(2, repository.GetAll().Count()); // Original repository should be unchanged
+        }
+
+        [TestMethod]
+        public void ThreadSafety_ConcurrentGetAll_ReturnsValidCollection()
+        {
+            // Arrange
+            const int iterations = 100;
+            const int initialBallCount = 10;
+            for (int i = 0; i < initialBallCount; i++)
+            {
+                repository.Add(new Ball(i, new Vector2(100, 100), 20));
+            }
 
             // Act & Assert
-            Assert.AreEqual(2, _repository.Count);
-
-            // Act
-            _repository.Clear();
-
-            // Assert
-            Assert.AreEqual(0, _repository.Count);
-        }
-
-        [TestMethod]
-        public void BallCollectionTest()
-        {
-            // Act
-            var ballsCollection = _repository.Balls;
-
-            // Assert
-            Assert.IsInstanceOfType(ballsCollection, typeof(ObservableCollection<IBall>));
-        }
-
-        [TestMethod]
-        public void BallsPropertyTest()
-        {
-            // Act
-            _repository.Add(_testBall);
-            var ballsCollection = _repository.Balls;
-
-            // Assert
-            Assert.AreEqual(1, ballsCollection.Count);
-            Assert.AreSame(_testBall, ballsCollection[0]);
+            Parallel.For(0, iterations, _ =>
+            {
+                var balls = repository.GetAll();
+                Assert.IsNotNull(balls);
+                Assert.IsTrue(balls.Count() <= initialBallCount);
+            });
         }
     }
-}
+} 

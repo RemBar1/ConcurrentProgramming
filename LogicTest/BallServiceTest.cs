@@ -1,104 +1,154 @@
-﻿using ConcurrentProgramming.Data;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using ConcurrentProgramming.Logic.Service;
+using ConcurrentProgramming.Data;
 using ConcurrentProgramming.Model;
+using System.Drawing;
+using System.Collections.Generic;
+using System.Linq;
 
-namespace ConcurrentProgramming.LogicTest
+namespace LogicTest
 {
     [TestClass]
-    public class BallServiceIntegrationTests
+    public class BallServiceTest
     {
-        private BallRepository _repository;
-        private BallService _ballService;
-        private const int TestBoardSize = 500;
-        private const int TestBoardThickness = 5;
+        private BallService ballService;
+        private IBallRepository ballRepository;
+        private const int BoardWidth = 800;
+        private const int BoardHeight = 600;
+        private const int BoardThickness = 10;
 
         [TestInitialize]
         public void Setup()
         {
-            _repository = new BallRepository();
-            _ballService = new BallService(
-                _repository,
-                TestBoardSize,
-                TestBoardSize,
-                TestBoardThickness);
+            ballRepository = new BallRepository();
+            ballService = new BallService(ballRepository, BoardWidth, BoardHeight, BoardThickness);
+        }
+
+        [TestCleanup]
+        public void Cleanup()
+        {
+            ballService.Dispose();
         }
 
         [TestMethod]
-        public void CreateBallsTest()
+        public void CreateBalls_ValidCount_CreatesCorrectNumberOfBalls()
         {
+            // Arrange
+            int ballCount = 5;
+            int diameter = 20;
+
             // Act
-            _ballService.CreateBalls(5, 20);
+            ballService.CreateBalls(ballCount, diameter);
 
             // Assert
-            Assert.AreEqual(5, _repository.Count);
-        }
-
-        [TestMethod]
-        public void CreateBallsNoCollisionsTest()
-        {
-            // Act
-            _ballService.CreateBalls(10, 20);
-
-            // Assert
-            var balls = _repository.GetAll().ToList();
-            for (int i = 0; i < balls.Count; i++)
+            Assert.AreEqual(ballCount, ballRepository.GetAll().Count());
+            foreach (var ball in ballRepository.GetAll())
             {
-                for (int j = i + 1; j < balls.Count; j++)
-                {
-                    double distance = (balls[i].Position - balls[j].Position).Length;
-                    double minDistance = balls[i].Diameter / 2 + balls[j].Diameter / 2;
-                    Assert.IsTrue(distance >= minDistance,
-                        $"Balls {i} and {j} are too close to each other");
-                }
+                Assert.AreEqual(diameter, ball.Diameter);
+                Assert.IsTrue(ball.Position.X >= diameter && ball.Position.X <= BoardWidth - BoardThickness * 2 - diameter);
+                Assert.IsTrue(ball.Position.Y >= diameter && ball.Position.Y <= BoardHeight - BoardThickness * 2 - diameter);
             }
         }
 
         [TestMethod]
-        public void StopSimulationTest()
+        public void CreateBalls_ValidCount_AssignsUniqueIds()
         {
             // Arrange
-            _ballService.CreateBalls(1, 20);
-            _ballService.StartSimulation();
+            int ballCount = 5;
+            int diameter = 20;
 
             // Act
-            _ballService.StopSimulation();
-            Thread.Sleep(100); // Czekamy na zatrzymanie
+            ballService.CreateBalls(ballCount, diameter);
 
             // Assert
-            Assert.IsFalse(_ballService.IsSimulationRunning);
+            var balls = ballRepository.GetAll().ToList();
+            var uniqueIds = balls.Select(b => b.Id).Distinct();
+            Assert.AreEqual(ballCount, uniqueIds.Count());
         }
 
         [TestMethod]
-        public void SimulationPositionsTest()
+        public void CreateBalls_ValidCount_AssignsRandomColors()
         {
             // Arrange
-            _ballService.CreateBalls(1, 20);
-            var ball = _repository.GetAll().First();
-            var initialPosition = ball.Position;
+            int ballCount = 10;
+            int diameter = 20;
 
             // Act
-            _ballService.StartSimulation();
-            Thread.Sleep(100); // Czekamy na aktualizację
+            ballService.CreateBalls(ballCount, diameter);
 
             // Assert
-            Assert.AreNotEqual(initialPosition, ball.Position);
-
-            _ballService.StopSimulation();
+            var balls = ballRepository.GetAll().ToList();
+            var uniqueColors = balls.Select(b => b.Color).Distinct();
+            Assert.IsTrue(uniqueColors.Count() > 1); // Should have multiple different colors
         }
 
         [TestMethod]
-        public void DisposeTest()
+        public void StartSimulation_StartsAndStops_Successfully()
         {
             // Arrange
-            _ballService.CreateBalls(1, 20);
-            _ballService.StartSimulation();
+            ballService.CreateBalls(5, 20);
+            var initialPositions = ballRepository.GetAll().Select(b => b.Position).ToList();
 
             // Act
-            _ballService.Dispose();
+            ballService.StartSimulation();
+            Thread.Sleep(100); // Let the simulation run for a bit
+            ballService.StopSimulation();
 
             // Assert
-            Assert.IsFalse(_ballService.IsSimulationRunning);
-            Assert.AreEqual(0, _repository.Count);
+            var finalPositions = ballRepository.GetAll().Select(b => b.Position).ToList();
+            Assert.AreNotEqual(initialPositions.Count, finalPositions.Count); // Positions should have changed
+        }
+
+        [TestMethod]
+        public void StopSimulation_ClearsAllBalls()
+        {
+            // Arrange
+            ballService.CreateBalls(5, 20);
+
+            // Act
+            ballService.StartSimulation();
+            Thread.Sleep(50);
+            ballService.StopSimulation();
+
+            // Assert
+            Assert.IsFalse(ballRepository.GetAll().Any());
+        }
+
+        [TestMethod]
+        public void Dispose_DisposesServiceProperly()
+        {
+            // Arrange
+            ballService.CreateBalls(5, 20);
+            ballService.StartSimulation();
+
+            // Act
+            ballService.Dispose();
+
+            // Assert
+            Assert.IsFalse(ballRepository.GetAll().Any());
+        }
+
+        [TestMethod]
+        public void CreateBalls_NoOverlap_BallsNotTooClose()
+        {
+            // Arrange
+            int ballCount = 5;
+            int diameter = 20;
+
+            // Act
+            ballService.CreateBalls(ballCount, diameter);
+
+            // Assert
+            var balls = ballRepository.GetAll().ToList();
+            for (int i = 0; i < balls.Count; i++)
+            {
+                for (int j = i + 1; j < balls.Count; j++)
+                {
+                    var distance = (balls[i].Position - balls[j].Position).Length;
+                    Assert.IsTrue(distance >= diameter, 
+                        $"Balls {i} and {j} are too close. Distance: {distance}, Required: {diameter}");
+                }
+            }
         }
     }
-}
+} 

@@ -1,86 +1,108 @@
-﻿using ConcurrentProgramming.Logic.Physics;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using ConcurrentProgramming.Logic.Physics;
 using ConcurrentProgramming.Model;
 
-namespace ConcurrentProgramming.LogicTest
+namespace LogicTest
 {
     [TestClass]
     public class PhysicsEngineTest
     {
-        private readonly IPhysicsEngine _physicsEngine = new PhysicsEngine();
+        private IPhysicsEngine physicsEngine;
+        private Ball ball1;
+        private Ball ball2;
 
-        [TestMethod]
-        public void HandleLeftWallCollisionTest()
+        [TestInitialize]
+        public void Setup()
         {
-            // Arrange
-            var ball = new Ball(1, new Vector2(0, 50), 10) { Velocity = new Vector2(-2, 3) };
-
-            // Act
-            _physicsEngine.HandleWallCollision(ball, 100, 100);
-
-            // Assert
-            Assert.AreEqual(2, ball.Velocity.X);
-            Assert.AreEqual(3, ball.Velocity.Y);
+            physicsEngine = new PhysicsEngine();
+            ball1 = new Ball(1, new Vector2(100, 100), 20);
+            ball2 = new Ball(2, new Vector2(200, 200), 20);
         }
 
         [TestMethod]
-        public void HandleRightWallCollisionTest()
+        public void HandleWallCollision_BallHitsRightWall_ReversesXVelocity()
         {
             // Arrange
-            var ball = new Ball(1, new Vector2(95, 50), 10) { Velocity = new Vector2(2, 3) };
+            ball1.Position = new Vector2(795, 100);
+            ball1.Velocity = new Vector2(10, 0);
 
             // Act
-            _physicsEngine.HandleWallCollision(ball, 100, 100);
+            bool collision = physicsEngine.HandleWallCollision(ball1, 800, 600);
 
             // Assert
-            Assert.AreEqual(-2, ball.Velocity.X);
-            Assert.AreEqual(3, ball.Velocity.Y);
+            Assert.IsTrue(collision);
+            Assert.AreEqual(-10, ball1.Velocity.X);
+            Assert.AreEqual(0, ball1.Velocity.Y);
         }
 
         [TestMethod]
-        public void HandleTopWallCollisionTest()
+        public void HandleWallCollision_BallHitsBottomWall_ReversesYVelocity()
         {
             // Arrange
-            var ball = new Ball(1, new Vector2(50, 0), 10) { Velocity = new Vector2(2, -3) };
+            ball1.Position = new Vector2(100, 595);
+            ball1.Velocity = new Vector2(0, 10);
 
             // Act
-            _physicsEngine.HandleWallCollision(ball, 100, 100);
+            bool collision = physicsEngine.HandleWallCollision(ball1, 800, 600);
 
             // Assert
-            Assert.AreEqual(2, ball.Velocity.X);
-            Assert.AreEqual(3, ball.Velocity.Y);
+            Assert.IsTrue(collision);
+            Assert.AreEqual(0, ball1.Velocity.X);
+            Assert.AreEqual(-10, ball1.Velocity.Y);
         }
 
         [TestMethod]
-        public void HandleBottomWallCollisionTest()
+        public void HandleWallCollision_NoCollision_ReturnsFalse()
         {
             // Arrange
-            var ball = new Ball(1, new Vector2(50, 95), 10) { Velocity = new Vector2(2, 3) };
+            ball1.Position = new Vector2(100, 100);
+            ball1.Velocity = new Vector2(5, 5);
 
             // Act
-            _physicsEngine.HandleWallCollision(ball, 100, 100);
+            bool collision = physicsEngine.HandleWallCollision(ball1, 800, 600);
 
             // Assert
-            Assert.AreEqual(2, ball.Velocity.X);
-            Assert.AreEqual(-3, ball.Velocity.Y);
+            Assert.IsFalse(collision);
+            Assert.AreEqual(5, ball1.Velocity.X);
+            Assert.AreEqual(5, ball1.Velocity.Y);
         }
 
         [TestMethod]
-        public void CorrectVelocitiesTest()
+        public void HandleBallCollision_BallsCollide_UpdatesVelocities()
         {
             // Arrange
-            var ball1 = new Ball(1, new Vector2(0, 0), 10) { Velocity = new Vector2(2, 0) };
-            var ball2 = new Ball(2, new Vector2(10, 0), 10) { Velocity = new Vector2(-1, 0) };
+            ball1.Position = new Vector2(100, 100);
+            ball2.Position = new Vector2(110, 100);
+            ball1.Velocity = new Vector2(10, 0);
+            ball2.Velocity = new Vector2(-10, 0);
 
             // Act
-            _physicsEngine.HandleBallCollision(ball1, ball2);
+            bool collision = physicsEngine.HandleBallCollision(ball1, ball2);
 
             // Assert
-            Assert.AreNotEqual(new Vector2(2, 0), ball1.Velocity);
-            Assert.AreNotEqual(new Vector2(-1, 0), ball2.Velocity);
-            // Zachowanie energii i pędu
-            var totalMomentumBefore = new Vector2(2 * 100 + -1 * 100, 0);
-            var totalMomentumAfter = new Vector2(ball1.Velocity.X * 100 + ball2.Velocity.X * 100, 0);
-            Assert.AreEqual(totalMomentumBefore.X, totalMomentumAfter.X, 0.001);
+            Assert.IsTrue(collision);
+            Assert.AreEqual(-10, ball1.Velocity.X);
+            Assert.AreEqual(10, ball2.Velocity.X);
+        }
+
+        [TestMethod]
+        public void HandleBallCollision_BallsTooFarApart_ReturnsFalse()
+        {
+            // Arrange
+            ball1.Position = new Vector2(100, 100);
+            ball2.Position = new Vector2(200, 200);
+            Vector2 originalVelocity1 = new Vector2(5, 0);
+            Vector2 originalVelocity2 = new Vector2(-5, 0);
+            ball1.Velocity = originalVelocity1;
+            ball2.Velocity = originalVelocity2;
+
+            // Act
+            bool collision = physicsEngine.HandleBallCollision(ball1, ball2);
+
+            // Assert
+            Assert.IsFalse(collision);
+            Assert.AreEqual(originalVelocity1, ball1.Velocity);
+            Assert.AreEqual(originalVelocity2, ball2.Velocity);
         }
     }
-}
+} 

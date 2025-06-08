@@ -1,44 +1,116 @@
-﻿using ConcurrentProgramming.Logic.Collision;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using ConcurrentProgramming.Logic.Collision;
 using ConcurrentProgramming.Model;
+using System.Collections.Generic;
+using System.Linq;
 
-namespace ConcurrentProgramming.LogicTest
+namespace LogicTest
 {
     [TestClass]
     public class CollisionDetectorTest
     {
-        private readonly ICollisionDetector _collisionDetector = new CollisionDetector();
+        private ICollisionDetector collisionDetector;
+        private List<IBall> balls;
 
-        [TestMethod]
-        public void DetectNoCollisionsTest()
+        [TestInitialize]
+        public void Setup()
         {
-            // Arrange
-            var balls = new[]
-            {
-                new Ball(1, new Vector2(0, 0), 10),
-                new Ball(2, new Vector2(20, 20), 10)
-            };
-
-            // Act
-            var collisions = _collisionDetector.DetectCollisions(balls);
-
-            // Assert
-            Assert.AreEqual(0, collisions.Count());
+            collisionDetector = new CollisionDetector();
+            balls = new List<IBall>();
         }
 
         [TestMethod]
-        public void DetectCollidingBallsTest()
+        public void DetectCollisions_NoCollisions_ReturnsEmptyList()
         {
             // Arrange
-            var ball1 = new Ball(1, new Vector2(0, 0), 10);
-            var ball2 = new Ball(2, new Vector2(9, 0), 10);
-            var balls = new[] { ball1, ball2 };
+            balls.Add(new Ball(1, new Vector2(100, 100), 20));
+            balls.Add(new Ball(2, new Vector2(200, 200), 20));
+            balls.Add(new Ball(3, new Vector2(300, 300), 20));
 
             // Act
-            var collisions = _collisionDetector.DetectCollisions(balls).ToList();
+            var collisions = collisionDetector.DetectCollisions(balls);
+
+            // Assert
+            Assert.IsFalse(collisions.Any());
+        }
+
+        [TestMethod]
+        public void DetectCollisions_TwoBallsColliding_ReturnsOnePair()
+        {
+            // Arrange
+            Ball ball1 = new Ball(1, new Vector2(100, 100), 20);
+            Ball ball2 = new Ball(2, new Vector2(110, 100), 20);
+            balls.Add(ball1);
+            balls.Add(ball2);
+
+            // Act
+            var collisions = collisionDetector.DetectCollisions(balls).ToList();
 
             // Assert
             Assert.AreEqual(1, collisions.Count);
-            Assert.IsTrue(collisions.Contains((ball1, ball2)) || collisions.Contains((ball2, ball1)));
+            var collision = collisions[0];
+            Assert.IsTrue((collision.Item1 == ball1 && collision.Item2 == ball2) ||
+                         (collision.Item1 == ball2 && collision.Item2 == ball1));
+        }
+
+        [TestMethod]
+        public void DetectCollisions_MultipleBallsColliding_ReturnsAllPairs()
+        {
+            // Arrange
+            Ball ball1 = new Ball(1, new Vector2(100, 100), 20);
+            Ball ball2 = new Ball(2, new Vector2(110, 100), 20);
+            Ball ball3 = new Ball(3, new Vector2(100, 110), 20);
+            balls.Add(ball1);
+            balls.Add(ball2);
+            balls.Add(ball3);
+
+            // Act
+            var collisions = collisionDetector.DetectCollisions(balls).ToList();
+
+            // Assert
+            Assert.AreEqual(3, collisions.Count); // All three balls are close enough to collide with each other
+        }
+
+        [TestMethod]
+        public void DetectCollisions_EmptyList_ReturnsEmptyList()
+        {
+            // Act
+            var collisions = collisionDetector.DetectCollisions(balls);
+
+            // Assert
+            Assert.IsFalse(collisions.Any());
+        }
+
+        [TestMethod]
+        public void DetectCollisions_SingleBall_ReturnsEmptyList()
+        {
+            // Arrange
+            balls.Add(new Ball(1, new Vector2(100, 100), 20));
+
+            // Act
+            var collisions = collisionDetector.DetectCollisions(balls);
+
+            // Assert
+            Assert.IsFalse(collisions.Any());
+        }
+
+        [TestMethod]
+        public void DetectCollisions_BallsAtSamePosition_ReturnsCollision()
+        {
+            // Arrange
+            Ball ball1 = new Ball(1, new Vector2(100, 100), 20);
+            Ball ball2 = new Ball(2, new Vector2(100, 100), 20);
+            balls.Add(ball1);
+            balls.Add(ball2);
+
+            // Act
+            var collisions = collisionDetector.DetectCollisions(balls).ToList();
+
+            // Assert
+            Assert.AreEqual(1, collisions.Count);
+            var collision = collisions[0];
+            Assert.IsTrue((collision.Item1 == ball1 && collision.Item2 == ball2) ||
+                         (collision.Item1 == ball2 && collision.Item2 == ball1));
         }
     }
-}
+} 

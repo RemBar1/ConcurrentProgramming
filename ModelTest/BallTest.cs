@@ -1,151 +1,180 @@
-﻿using ConcurrentProgramming.Model;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using ConcurrentProgramming.Model;
+using System.Drawing;
+using System.ComponentModel;
 
-namespace ConcurrentProgramming.ModelTest
+namespace ModelTest
 {
     [TestClass]
     public class BallTest
     {
-        private Ball _ball;
-        private bool _propertyChangedFired;
+        private Ball ball;
+        private bool propertyChanged;
+        private string lastPropertyName;
 
         [TestInitialize]
         public void Setup()
         {
-            _ball = new Ball(1, new Vector2(10, 10), 20);
-            _ball.PropertyChanged += (sender, args) => _propertyChangedFired = true;
-            _propertyChangedFired = false;
+            ball = new Ball(1, new Vector2(100, 100), 20);
+            propertyChanged = false;
+            lastPropertyName = string.Empty;
+            ball.PropertyChanged += Ball_PropertyChanged;
+        }
+
+        private void Ball_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            propertyChanged = true;
+            lastPropertyName = e.PropertyName;
         }
 
         [TestMethod]
-        public void ConstructorTest()
+        public void Constructor_ValidParameters_CreatesCorrectBall()
         {
             // Assert
-            Assert.AreEqual(1, _ball.Id);
-            Assert.AreEqual(new Vector2(10, 10), _ball.Position);
-            Assert.AreEqual(20, _ball.Diameter);
-            Assert.AreEqual(400, _ball.Mass); // 20 * 20
+            Assert.AreEqual(1, ball.Id);
+            Assert.AreEqual(100, ball.Position.X);
+            Assert.AreEqual(100, ball.Position.Y);
+            Assert.AreEqual(20, ball.Diameter);
+            Assert.AreEqual(400, ball.Mass); // Mass = diameter * diameter
         }
 
         [TestMethod]
-        public void PositionTest()
-        {
-            // Act
-            _ball.Position = new Vector2(20, 20);
-
-            // Assert
-            Assert.IsTrue(_propertyChangedFired);
-            Assert.AreEqual(new Vector2(20, 20), _ball.Position);
-        }
-
-        [TestMethod]
-        public void PositionNotChangedTest()
+        public void Position_SetNewValue_RaisesPropertyChanged()
         {
             // Arrange
-            var originalPosition = _ball.Position;
+            Vector2 newPosition = new Vector2(200, 200);
 
             // Act
-            _ball.Position = originalPosition;
+            ball.Position = newPosition;
 
             // Assert
-            Assert.IsFalse(_propertyChangedFired);
+            Assert.IsTrue(propertyChanged);
+            Assert.AreEqual(nameof(Ball.Position), lastPropertyName);
+            Assert.AreEqual(newPosition, ball.Position);
         }
 
         [TestMethod]
-        public void DiameterTest()
-        {
-            // Act
-            _ball.Diameter = 30;
-
-            // Assert
-            Assert.IsTrue(_propertyChangedFired);
-            Assert.AreEqual(30, _ball.Diameter);
-        }
-
-        [TestMethod]
-        public void VelocityTest()
-        {
-            // Act
-            _ball.Velocity = new Vector2(5, 5);
-
-            // Assert
-            Assert.IsTrue(_propertyChangedFired);
-            Assert.AreEqual(new Vector2(5, 5), _ball.Velocity);
-        }
-
-        [TestMethod]
-        public void UpdatePositionTest()
-        {
-            // Act
-            _ball.UpdatePosition(new Vector2(15, 15));
-
-            // Assert
-            Assert.AreEqual(new Vector2(15, 15), _ball.Position);
-            Assert.IsTrue(_propertyChangedFired);
-        }
-
-        [TestMethod]
-        public void MassTest()
+        public void Position_SetSameValue_DoesNotRaisePropertyChanged()
         {
             // Arrange
-            _ball.Diameter = 10;
+            Vector2 samePosition = new Vector2(100, 100);
 
-            // Act & Assert
-            Assert.AreEqual(100, _ball.Mass);
+            // Act
+            ball.Position = samePosition;
 
-            // Arrange
-            _ball.Diameter = 25;
-
-            // Act & Assert
-            Assert.AreEqual(625, _ball.Mass);
+            // Assert
+            Assert.IsFalse(propertyChanged);
         }
 
         [TestMethod]
-        public void PositionThreadSafeTest()
+        public void Diameter_SetNewValue_RaisesPropertyChanged()
+        {
+            // Act
+            ball.Diameter = 30;
+
+            // Assert
+            Assert.IsTrue(propertyChanged);
+            Assert.AreEqual(nameof(Ball.Diameter), lastPropertyName);
+            Assert.AreEqual(30, ball.Diameter);
+            Assert.AreEqual(900, ball.Mass); // New mass should be 30 * 30
+        }
+
+        [TestMethod]
+        public void Diameter_SetSameValue_DoesNotRaisePropertyChanged()
+        {
+            // Act
+            ball.Diameter = 20;
+
+            // Assert
+            Assert.IsFalse(propertyChanged);
+        }
+
+        [TestMethod]
+        public void Velocity_SetNewValue_RaisesPropertyChanged()
         {
             // Arrange
-            var newPosition = new Vector2(20, 20);
-            var positionSet = false;
-            var monitor = new object();
+            Vector2 newVelocity = new Vector2(5, 5);
 
             // Act
-            var thread = new Thread(() =>
+            ball.Velocity = newVelocity;
+
+            // Assert
+            Assert.IsTrue(propertyChanged);
+            Assert.AreEqual(nameof(Ball.Velocity), lastPropertyName);
+            Assert.AreEqual(newVelocity, ball.Velocity);
+        }
+
+        [TestMethod]
+        public void Velocity_SetSameValue_DoesNotRaisePropertyChanged()
+        {
+            // Arrange
+            Vector2 velocity = new Vector2(0, 0);
+            ball.Velocity = velocity;
+            propertyChanged = false;
+
+            // Act
+            ball.Velocity = velocity;
+
+            // Assert
+            Assert.IsFalse(propertyChanged);
+        }
+
+        [TestMethod]
+        public void Color_SetNewValue_RaisesPropertyChanged()
+        {
+            // Act
+            ball.Color = Color.Red;
+
+            // Assert
+            Assert.IsTrue(propertyChanged);
+            Assert.AreEqual(nameof(Ball.Color), lastPropertyName);
+            Assert.AreEqual(Color.Red, ball.Color);
+        }
+
+        [TestMethod]
+        public void Color_SetSameValue_DoesNotRaisePropertyChanged()
+        {
+            // Arrange
+            ball.Color = Color.Blue;
+            propertyChanged = false;
+
+            // Act
+            ball.Color = Color.Blue;
+
+            // Assert
+            Assert.IsFalse(propertyChanged);
+        }
+
+        [TestMethod]
+        public void UpdatePosition_NewPosition_UpdatesPositionAndRaisesPropertyChanged()
+        {
+            // Arrange
+            Vector2 newPosition = new Vector2(300, 300);
+
+            // Act
+            ball.UpdatePosition(newPosition);
+
+            // Assert
+            Assert.IsTrue(propertyChanged);
+            Assert.AreEqual(nameof(Ball.Position), lastPropertyName);
+            Assert.AreEqual(newPosition, ball.Position);
+        }
+
+        [TestMethod]
+        public void ThreadSafety_ConcurrentPositionUpdates_NoDataRace()
+        {
+            // Arrange
+            const int iterations = 1000;
+            Vector2 finalPosition = new Vector2(200, 200);
+
+            // Act
+            Parallel.For(0, iterations, _ =>
             {
-                lock (monitor)
-                {
-                    _ball.Position = newPosition;
-                    positionSet = true;
-                    Monitor.Pulse(monitor);
-                }
+                ball.UpdatePosition(finalPosition);
             });
 
-            lock (monitor)
-            {
-                thread.Start();
-                Monitor.Wait(monitor);
-            }
-
             // Assert
-            Assert.IsTrue(positionSet);
-            Assert.AreEqual(newPosition, _ball.Position);
-        }
-
-        [TestMethod]
-        public void PropertyChangedTest()
-        {
-            // Arrange
-            var changedProperties = new List<string>();
-            _ball.PropertyChanged += (sender, args) => changedProperties.Add(args.PropertyName);
-
-            // Act
-            _ball.Position = new Vector2(15, 15);
-            _ball.Diameter = 25;
-            _ball.Velocity = new Vector2(2, 2);
-
-            // Assert
-            Assert.AreEqual(3, changedProperties.Count);
-            Assert.IsTrue(changedProperties.Contains(nameof(Ball.Position)));
-            Assert.IsTrue(changedProperties.Contains(nameof(Ball.Diameter)));
-            Assert.IsTrue(changedProperties.Contains(nameof(Ball.Velocity)));
+            Assert.AreEqual(finalPosition, ball.Position);
         }
     }
-}
+} 
